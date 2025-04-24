@@ -1,0 +1,56 @@
+.cart-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.cart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  position: sticky;
+  top: 0;
+  background-color: white;
+  z-index: 1;
+}
+
+.cart-items {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+.cart-item {
+  padding: 16px 24px;
+  position: relative;
+}
+
+.cart-footer {
+  position: sticky;
+  bottom: 0;
+  background-color: white;
+  box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* Animation for items being added to cart */
+@keyframes addToCartAnimation {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.5) translateY(-100px) translateX(100px);
+  }
+}
+
+.add-to-cart-animation {
+  position: fixed;
+  z-index: 9999;
+  animation: addToCartAnimation 0.5s forwards;
+} 

@@ -1,0 +1,65 @@
+.header {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.MuiToolbar-root {
+  justify-content: space-between;
+}
+
+.logo {
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+/* Responsive Styles */
+@media (max-width: 960px) {
+  .header .MuiTypography-root {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .nav-links {
+    display: none;
+  }
+  
+  .header .MuiIconButton-root {
+    padding: 8px;
+  }
+  
+  .MuiToolbar-root {
+    min-height: 56px;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+}
+
+/* Drawer Styles */
+.MuiDrawer-paper {
+  background-color: #000 !important;
+  color: white !important;
+}
+
+.MuiListItemButton-root {
+  padding: 12px 16px;
+}
+
+.MuiListItemButton-root:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.MuiListItemText-primary {
+  font-size: 1.1rem;
+}
+
+.menu-divider {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Search bar styles */
+@media (max-width: 600px) {
+  .MuiInputBase-input {
+    width: 0;
+    padding: 8px !important;
+  }
+} 
