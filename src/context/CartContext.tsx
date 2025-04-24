@@ -1,8 +1,8 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
-// Định nghĩa kiểu dữ liệu cho sản phẩm trong giỏ hàng
+// Định nghĩa kiểu dữ liệu cho sản phẩm trong giỏ hàng - Make sure this is exported
 export interface CartItem {
-  id: number;
+  id: string;
   name: string;
   fullName: string;
   price: string;
@@ -18,9 +18,9 @@ interface CartContextType {
   cartCount: number;
   isCartOpen: boolean;
   addToCart: (item: CartItem) => void;
-  removeFromCart: (id: number) => void;
-  increaseQuantity: (id: number) => void;
-  decreaseQuantity: (id: number) => void;
+  removeFromCart: (id: string) => void;
+  increaseQuantity: (id: string, color: string) => void;
+  decreaseQuantity: (id: string, color: string) => void;
   toggleCart: () => void;
   closeCart: () => void;
 }
@@ -28,7 +28,7 @@ interface CartContextType {
 // Tạo context
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-// Hook để sử dụng context
+// Hook để sử dụng context - Exported
 export const useCart = () => {
   const context = useContext(CartContext);
   if (!context) {
@@ -70,22 +70,24 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     setIsCartOpen(true);
   };
 
-  const removeFromCart = (id: number) => {
+  const removeFromCart = (id: string) => {
     setCartItems(prevItems => prevItems.filter(item => item.id !== id));
   };
 
-  const increaseQuantity = (id: number) => {
+  const increaseQuantity = (id: string, color: string) => {
     setCartItems(prevItems =>
       prevItems.map(item =>
-        item.id === id ? { ...item, quantity: item.quantity + 1 } : item
+        item.id === id && item.color === color
+          ? { ...item, quantity: item.quantity + 1 } 
+          : item
       )
     );
   };
 
-  const decreaseQuantity = (id: number) => {
+  const decreaseQuantity = (id: string, color: string) => {
     setCartItems(prevItems =>
       prevItems.map(item =>
-        item.id === id && item.quantity > 1 
+        item.id === id && item.color === color && item.quantity > 1
           ? { ...item, quantity: item.quantity - 1 } 
           : item
       )

@@ -1,39 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { Container, Typography, Grid, Card, CardMedia, CardContent, Button, Box, Snackbar, Alert } from '@mui/material';
-import { useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Container, Typography, Grid, Card, CardMedia, CardContent, Button, Box, Snackbar, Alert, CircularProgress } from '@mui/material';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { productService, Product } from '../../api/product';
 import './Home.css';
-
-const featuredProducts = [
-  {
-    id: 1,
-    name: 'iPhone 15 Pro',
-    price: '29.990.000 ₫',
-    image: 'https://placehold.co/300x200/333/fff?text=iPhone+15+Pro',
-    category: 'Điện thoại'
-  },
-  {
-    id: 2,
-    name: 'MacBook Pro M3',
-    price: '49.990.000 ₫',
-    image: 'https://placehold.co/300x200/333/fff?text=MacBook+Pro+M3',
-    category: 'Laptop'
-  },
-  {
-    id: 3,
-    name: 'iPad Pro',
-    price: '24.990.000 ₫',
-    image: 'https://placehold.co/300x200/333/fff?text=iPad+Pro',
-    category: 'Máy tính bảng'
-  },
-  {
-    id: 4,
-    name: 'AirPods Pro',
-    price: '6.990.000 ₫',
-    image: 'https://placehold.co/300x200/333/fff?text=AirPods+Pro',
-    category: 'Tai nghe'
-  }
-];
 
 interface LocationState {
   loginSuccess?: boolean;
@@ -42,17 +12,41 @@ interface LocationState {
 
 const Home = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [notification, setNotification] = useState<{
     show: boolean;
     message: string;
-    type: 'success' | 'info';
+    type: 'success' | 'info' | 'error';
   }>({
     show: false,
     message: '',
     type: 'success'
   });
+  
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>('');
 
+  // Fetch products
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const response = await productService.getPublishedProducts();
+        setProducts(response.metadata);
+        setLoading(false);
+      } catch (err) {
+        console.error('Failed to fetch products:', err);
+        setError('Không thể tải sản phẩm. Vui lòng thử lại sau.');
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  // Check if user came from login/signup
   useEffect(() => {
     const state = location.state as LocationState;
     
@@ -84,6 +78,16 @@ const Home = () => {
     });
   };
 
+  // Function to handle product click
+  const handleProductClick = (productId: string) => {
+    navigate(`/product/${productId}`);
+  };
+
+  // Format price with Vietnamese currency
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+  };
+
   return (
     <div className="home" style={{ width: '100%', maxWidth: '100%' }}>
       <div className="hero-section">
@@ -107,42 +111,58 @@ const Home = () => {
           Sản phẩm nổi bật
         </Typography>
 
-        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-          <Grid container spacing={4} justifyContent="center" sx={{ mx: 'auto' }}>
-            {featuredProducts.map((product) => (
-              <Grid 
-                item
-                key={product.id} 
-                xs={12} 
-                sm={6} 
-                md={3}
-              >
-                <Card className="product-card">
-                  <CardMedia
-                    component="img"
-                    image={product.image}
-                    alt={product.name}
-                    height="200"
-                  />
-                  <CardContent>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      {product.category}
-                    </Typography>
-                    <Typography variant="h6" component="h3">
-                      {product.name}
-                    </Typography>
-                    <Typography variant="body1" color="text.primary" sx={{ fontWeight: 'bold', mt: 1 }}>
-                      {product.price}
-                    </Typography>
-                    <Button variant="outlined" color="primary" sx={{ mt: 2 }}>
-                      Mua ngay
-                    </Button>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', my: 5 }}>
+            <CircularProgress />
+          </Box>
+        ) : error ? (
+          <Alert severity="error" sx={{ my: 3 }}>{error}</Alert>
+        ) : products.length === 0 ? (
+          <Alert severity="info" sx={{ my: 3 }}>Không có sản phẩm nào.</Alert>
+        ) : (
+          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Grid container spacing={4} justifyContent="center" sx={{ mx: 'auto' }}>
+              {products.map((product) => (
+                <Grid 
+                  item
+                  key={product._id} 
+                  xs={12} 
+                  sm={6} 
+                  md={3}
+                >
+                  <Card 
+                    className="product-card"
+                    onClick={() => handleProductClick(product._id)}
+                    sx={{ cursor: 'pointer', height: '100%', display: 'flex', flexDirection: 'column' }}
+                  >
+                    <CardMedia
+                      component="img"
+                      image={product.product_thumb || `https://placehold.co/300x200/333/fff?text=${encodeURIComponent(product.product_name)}`}
+                      alt={product.product_name}
+                      sx={{ height: 200, objectFit: 'contain' }}
+                    />
+                    <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                      <Typography variant="body2" color="text.secondary" gutterBottom>
+                        {product.product_type}
+                      </Typography>
+                      <Typography variant="h6" component="h3" sx={{ flexGrow: 1 }}>
+                        {product.product_name}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ mt: 1, minHeight: '40px' }}>
+                        {product.product_description.length > 60 
+                          ? `${product.product_description.substring(0, 60)}...` 
+                          : product.product_description}
+                      </Typography>
+                      <Typography variant="body1" color="text.primary" sx={{ fontWeight: 'bold', mt: 1 }}>
+                        {formatPrice(product.product_price)}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+        )}
       </Container>
 
       <div className="cta-section">

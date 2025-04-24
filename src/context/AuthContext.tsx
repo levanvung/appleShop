@@ -8,11 +8,23 @@ interface UserInfo {
   email: string;
 }
 
+interface AuthResponse {
+  message: string;
+  code: number;
+  metadata: {
+    shop?: UserInfo;
+    tokens: {
+      accessToken: string;
+      refreshToken: string;
+    };
+  };
+}
+
 interface AuthContextType {
   isAuthenticated: boolean;
   user: UserInfo | null;
-  login: (email: string, password: string) => Promise<any>;
-  signup: (name: string, email: string, password: string) => Promise<any>;
+  login: (email: string, password: string) => Promise<AuthResponse>;
+  signup: (name: string, email: string, password: string) => Promise<AuthResponse>;
   logout: () => void;
 }
 
@@ -46,6 +58,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         
         // Save user info to localStorage
         localStorage.setItem('userInfo', JSON.stringify(response.metadata.shop));
+        localStorage.setItem('userId', response.metadata.shop._id);
       }
       
       return response;
@@ -66,6 +79,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         
         // Save user info to localStorage
         localStorage.setItem('userInfo', JSON.stringify(response.metadata.shop));
+        localStorage.setItem('userId', response.metadata.shop._id);
       }
       
       return response;
@@ -81,6 +95,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setIsAuthenticated(false);
     setUser(null);
     localStorage.removeItem('userInfo');
+    localStorage.removeItem('userId');
   };
 
   return (

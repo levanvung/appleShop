@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:3055/v1/api/shop';
+const BASE_URL = 'http://localhost:3055/v1/api/';
 
 export const apiClient = axios.create({
     baseURL: BASE_URL,
@@ -15,7 +15,8 @@ apiClient.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('accessToken');
         if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
+            // Send only the token without 'Bearer ' prefix
+            config.headers.Authorization = token;
         }
         return config;
     },

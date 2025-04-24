@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Container, 
   Typography, 
@@ -6,16 +6,19 @@ import {
   Box, 
   Chip, 
   IconButton, 
-  Rating, 
   Snackbar,
   Paper,
-  Divider
+  Divider,
+  CircularProgress,
+  Alert as MuiAlert
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
-import MuiAlert, { AlertProps } from '@mui/material/Alert';
+import { AlertProps } from '@mui/material/Alert';
 import { ShoppingCart, Favorite, Share, ArrowBackIos, ArrowForwardIos } from '@mui/icons-material';
-import { useParams } from 'react-router-dom';
-import { useCart, CartItemType } from '../../contexts/CartContext';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useCart } from '../../context/CartContext';
+import type { CartItem } from '../../context/CartContext';
+import { productService, Product } from '../../api/product';
 import './ProductDetail.css';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
@@ -34,99 +37,77 @@ const colorMap: Record<string, string> = {
   "#6F8FAF": "Steel Blue",
 };
 
-// Mock product data
-const products = [
-  {
-    id: 1,
-    name: 'Premium Leather Jacket',
-    price: 299.99,
-    rating: 4.5,
-    reviewCount: 128,
-    description: 'Genuine leather jacket with premium stitching and comfortable fit. Perfect for all seasons.',
-    details: [
-      'Genuine Leather Material',
-      'Premium Stitching',
-      'Comfortable Fit',
-      'Multiple Pockets',
-      'Water Resistant'
-    ],
-    colors: ['#000000', '#784212', '#5D6D7E'],
-    sizes: ['S', 'M', 'L', 'XL'],
-    images: [
-      '/images/products/leather-jacket-1.jpg',
-      '/images/products/leather-jacket-2.jpg',
-      '/images/products/leather-jacket-3.jpg',
-      '/images/products/leather-jacket-4.jpg'
-    ],
-    promotions: [
-      'Free Shipping',
-      '30-Day Returns',
-      '2-Year Warranty'
-    ]
-  }
-];
-
 const ProductDetail = () => {
-  const { productId } = useParams();
-  const product = products.find(p => p.id === Number(productId)) || products[0];
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { addToCart } = useCart();
+  
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [selectedColor, setSelectedColor] = useState(product.colors[0]);
-  const [selectedSize, setSelectedSize] = useState(product.sizes[1]);
+  const [selectedColor, setSelectedColor] = useState<string>('');
+  const [selectedSize, setSelectedSize] = useState<string>('');
   const [quantity, setQuantity] = useState(1);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   
-  const { addToCart } = useCart();
   const buttonRef = useRef<HTMLButtonElement>(null);
 
+  // Fetch product details
+  useEffect(() => {
+    const fetchProductDetails = async () => {
+      if (!id) {
+        setError('Product ID not found.');
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await productService.getProductById(id!);
+        // Check if metadata is an object (not an array)
+        if (response.metadata && typeof response.metadata === 'object' && !Array.isArray(response.metadata)) {
+          // Directly use the metadata object as the product
+          const fetchedProduct = response.metadata as Product;
+          setProduct(fetchedProduct);
+          // Set initial selected color/size based on new fields
+          if (fetchedProduct.product_colors && fetchedProduct.product_colors.length > 0) {
+            setSelectedColor(fetchedProduct.product_colors[0]);
+          } else if (fetchedProduct.product_attributes?.color) {
+            // Use color from product_attributes if product_colors doesn't exist
+            setSelectedColor(fetchedProduct.product_attributes.color);
+          }
+          
+          if (fetchedProduct.product_sizes && fetchedProduct.product_sizes.length > 0) {
+             setSelectedSize(fetchedProduct.product_sizes[0]);
+          }
+        } else {
+          setError('Product not found.');
+        }
+      } catch (err) {
+        console.error('Error fetching product details:', err);
+        setError('Failed to load product details. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProductDetails();
+  }, [id]);
+
   const handlePrevImage = () => {
-    setSelectedImageIndex(prev => (prev > 0 ? prev - 1 : product.images.length - 1));
+    if (!product || !product.product_images || product.product_images.length === 0) return;
+    setSelectedImageIndex(prev => (prev > 0 ? prev - 1 : product.product_images!.length - 1));
   };
 
   const handleNextImage = () => {
-    setSelectedImageIndex(prev => (prev < product.images.length - 1 ? prev + 1 : 0));
+    if (!product || !product.product_images || product.product_images.length === 0) return;
+    setSelectedImageIndex(prev => (prev < product.product_images!.length - 1 ? prev + 1 : 0));
   };
 
-  const handleAddToCart = () => {
-    // Prepare cart item
-    const cartItem: CartItemType = {
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.images[selectedImageIndex],
-      color: selectedColor,
-      size: selectedSize,
-      quantity: quantity
-    };
-    
-    // Add to cart
-    addToCart(cartItem);
-    
-    // Show success message
-    setOpenSnackbar(true);
-  };
-
-  const handleBuyNow = () => {
-    // Add to cart and redirect to checkout
-    addToCart({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      color: selectedColor,
-      size: selectedSize,
-      quantity: quantity,
-      image: product.images[selectedImageIndex]
-    });
-    
-    // Redirect to checkout (implement later)
-    console.log('Redirecting to checkout...');
-  };
-
-  const handleCloseSnackbar = (event?: React.SyntheticEvent | Event, reason?: string) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    setOpenSnackbar(false);
+  const handleImageSelect = (index: number) => {
+    setSelectedImageIndex(index);
   };
 
   const handleQuantityChange = (amount: number) => {
@@ -142,9 +123,81 @@ const ProductDetail = () => {
     setSelectedSize(size);
   };
 
-  const handleImageSelect = (image: string) => {
-    setSelectedImageIndex(product.images.indexOf(image));
+  const handleAddToCart = () => {
+    if (!product) return;
+    
+    // Create the cart item and ignore TypeScript incompatibility for now
+    const cartItem = { 
+      id: product._id, 
+      name: product.product_name,
+      fullName: product.product_name,
+      price: product.product_price.toString(),
+      image: product.product_images?.[selectedImageIndex] || product.product_thumb,
+      color: selectedColor || product.product_colors?.[0] || '', 
+      colorName: colorMap[selectedColor || product.product_colors?.[0] || ''] || 'Default',
+      size: selectedSize || product.product_sizes?.[0] || '',
+      quantity: quantity,
+    } as any; // Use type assertion to bypass type checking
+    
+    addToCart(cartItem);
+    setOpenSnackbar(true);
   };
+
+  const handleBuyNow = () => {
+    if (!product) return;
+    handleAddToCart();
+    console.log('Redirecting to checkout...');
+  };
+
+  const handleCloseSnackbar = (event?: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpenSnackbar(false);
+  };
+
+  // Format price
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+  };
+
+  // Render Loading state
+  if (loading) {
+    return (
+      <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+        <CircularProgress />
+      </Container>
+    );
+  }
+
+  // Render Error state
+  if (error) {
+    return (
+      <Container sx={{ textAlign: 'center', py: 5 }}>
+        <MuiAlert severity="error">{error}</MuiAlert>
+        <Button variant="outlined" onClick={() => navigate('/')} sx={{ mt: 2 }}>
+          Back to Home
+        </Button>
+      </Container>
+    );
+  }
+
+  // Render Not Found state
+  if (!product) {
+    return (
+      <Container sx={{ textAlign: 'center', py: 5 }}>
+        <MuiAlert severity="warning">Product not found.</MuiAlert>
+         <Button variant="outlined" onClick={() => navigate('/')} sx={{ mt: 2 }}>
+          Back to Home
+        </Button>
+      </Container>
+    );
+  }
+  
+  // Use optional chaining and nullish coalescing for safety
+  const productImages = product?.product_images ?? [product?.product_thumb].filter(Boolean) as string[];
+  const productColors = product?.product_colors ?? [];
+  const productSizes = product?.product_sizes ?? [];
 
   return (
     <Container className="product-detail-page">
@@ -152,199 +205,168 @@ const ProductDetail = () => {
         {/* Product Images */}
         <Grid item xs={12} md={6}>
           <Paper elevation={2} sx={{ p: 2, borderRadius: 2, overflow: 'hidden' }}>
-            <Box className="product-image-container">
+            <Box className="product-image-container" sx={{ height: 400, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               <img 
-                src={product.images[selectedImageIndex] || '/images/placeholder.jpg'} 
-                alt={product.name} 
+                src={productImages[selectedImageIndex] || '/images/placeholder.jpg'} 
+                alt={product.product_name} 
                 style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} 
               />
             </Box>
             
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-              <IconButton onClick={handlePrevImage}>
-                <ArrowBackIos />
-              </IconButton>
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                {product.images.map((img, index) => (
-                  <Box 
-                    key={index}
-                    sx={{
-                      width: 60,
-                      height: 60,
-                      border: index === selectedImageIndex ? '2px solid #1976d2' : '1px solid #ddd',
-                      borderRadius: 1,
-                      overflow: 'hidden',
-                      cursor: 'pointer'
-                    }}
-                    onClick={() => handleImageSelect(img)}
-                  >
-                    <img 
-                      src={img} 
-                      alt={`${product.name} ${index + 1}`} 
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                    />
-                  </Box>
-                ))}
+            {productImages.length > 1 && (
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
+                <IconButton onClick={handlePrevImage} disabled={productImages.length <= 1}>
+                  <ArrowBackIos />
+                </IconButton>
+                <Box sx={{ display: 'flex', gap: 1, overflowX: 'auto', flexGrow: 1, justifyContent: 'center' }}>
+                  {productImages.map((img, index) => (
+                    <Box 
+                      key={index}
+                      sx={{
+                        minWidth: 60,
+                        height: 60,
+                        border: index === selectedImageIndex ? '2px solid #1976d2' : '1px solid #ddd',
+                        borderRadius: 1,
+                        overflow: 'hidden',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => handleImageSelect(index)}
+                    >
+                      <img 
+                        src={img} 
+                        alt={`${product.product_name} ${index + 1}`} 
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                      />
+                    </Box>
+                  ))}
+                </Box>
+                <IconButton onClick={handleNextImage} disabled={productImages.length <= 1}>
+                  <ArrowForwardIos />
+                </IconButton>
               </Box>
-              <IconButton onClick={handleNextImage}>
-                <ArrowForwardIos />
-              </IconButton>
-            </Box>
+            )}
           </Paper>
         </Grid>
         
         {/* Product Details */}
         <Grid item xs={12} md={6}>
           <Typography variant="h4" component="h1" gutterBottom>
-            {product.name}
+            {product.product_name}
           </Typography>
           
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-            <Rating value={product.rating} precision={0.5} readOnly />
-            <Typography variant="body2" sx={{ ml: 1 }}>
-              ({product.reviewCount} reviews)
-            </Typography>
+            <Chip label={product.product_type} color="secondary" size="small" />
           </Box>
           
-          <Typography variant="h5" component="p" sx={{ fontWeight: 'bold', my: 2 }}>
-            ${product.price.toFixed(2)}
+          <Typography variant="h5" component="p" sx={{ fontWeight: 'bold', my: 2, color: 'primary.main' }}>
+            {formatPrice(product.product_price)}
           </Typography>
           
           <Typography variant="body1" sx={{ mb: 3 }}>
-            {product.description}
+            {product.product_description}
           </Typography>
           
           <Divider sx={{ my: 3 }} />
           
-          {/* Color Selection */}
+          {/* Attributes Section */}
           <Box sx={{ mb: 3 }}>
-            <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>
-              Color: {colorMap[selectedColor]}
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              {product.colors.map((color) => (
-                <Box
-                  key={color}
-                  sx={{
-                    width: 40,
-                    height: 40,
-                    bgcolor: color,
-                    borderRadius: '50%',
-                    cursor: 'pointer',
-                    border: selectedColor === color ? '2px solid #1976d2' : '1px solid #e0e0e0',
-                    boxShadow: selectedColor === color ? 2 : 0,
-                    '&:hover': {
-                      opacity: 0.8,
-                    },
-                  }}
-                  onClick={() => handleColorSelect(color)}
-                />
-              ))}
-            </Box>
+            <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>Details</Typography>
+            <Typography variant="body2">Manufacturer: {product.product_attributes?.manufacturer || 'N/A'}</Typography>
+            <Typography variant="body2">Model: {product.product_attributes?.model || 'N/A'}</Typography>
+            {product.product_attributes?.color && !productColors.length && (
+              <Typography variant="body2">Color: {product.product_attributes.color}</Typography>
+            )}
           </Box>
+          
+          {/* Color Selection */}
+          {productColors.length > 0 && (
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>
+                Color: {colorMap[selectedColor] || selectedColor}
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                {productColors.map((color) => (
+                  <Box
+                    key={color}
+                    sx={{
+                      width: 30,
+                      height: 30,
+                      bgcolor: color,
+                      borderRadius: '50%',
+                      cursor: 'pointer',
+                      border: selectedColor === color ? '2px solid #1976d2' : '1px solid #e0e0e0',
+                      boxShadow: selectedColor === color ? 2 : 0,
+                      '&:hover': { opacity: 0.8 },
+                    }}
+                    onClick={() => handleColorSelect(color)}
+                  />
+                ))}
+              </Box>
+            </Box>
+          )}
           
           {/* Size Selection */}
-          <Box sx={{ mb: 3 }}>
-            <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>
-              Size: {selectedSize}
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              {product.sizes.map((size) => (
-                <Button
-                  key={size}
-                  onClick={() => handleSizeSelect(size)}
-                  variant={selectedSize === size ? 'contained' : 'outlined'}
-                  sx={{
-                    minWidth: 40,
-                    height: 40,
-                  }}
-                >
-                  {size}
-                </Button>
-              ))}
+          {productSizes.length > 0 && (
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>
+                Size: {selectedSize || 'Select a size'}
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {productSizes.map((size) => (
+                  <Chip 
+                    key={size}
+                    label={size}
+                    clickable
+                    color={selectedSize === size ? 'primary' : 'default'}
+                    onClick={() => handleSizeSelect(size)}
+                    variant={selectedSize === size ? 'filled' : 'outlined'}
+                  />
+                ))}
+              </Box>
             </Box>
-          </Box>
+          )}
           
           {/* Quantity */}
-          <Box sx={{ mb: 3 }}>
-            <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>
-              Quantity:
-            </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <IconButton 
-                onClick={() => handleQuantityChange(-1)}
-                disabled={quantity <= 1}
-                size="small"
-              >
-                <RemoveIcon />
-              </IconButton>
-              <Typography sx={{ mx: 2, minWidth: 30, textAlign: 'center' }}>
-                {quantity}
-              </Typography>
-              <IconButton 
-                onClick={() => handleQuantityChange(1)}
-                size="small"
-              >
-                <AddIcon />
-              </IconButton>
-            </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+            <Typography variant="subtitle1" sx={{ mr: 2, fontWeight: 'bold' }}>Quantity:</Typography>
+            <IconButton size="small" onClick={() => handleQuantityChange(-1)} disabled={quantity <= 1}>
+              <RemoveIcon />
+            </IconButton>
+            <Typography sx={{ mx: 2, minWidth: '20px', textAlign: 'center' }}>{quantity}</Typography>
+            <IconButton size="small" onClick={() => handleQuantityChange(1)} disabled={quantity >= product.product_quantity}>
+              <AddIcon />
+            </IconButton>
+             <Typography variant="body2" sx={{ ml: 2 }}>(In Stock: {product.product_quantity})</Typography>
           </Box>
           
-          <Divider sx={{ my: 3 }} />
-          
           {/* Action Buttons */}
-          <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+          <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
             <Button 
               variant="contained" 
-              size="large" 
-              startIcon={<ShoppingCart />}
+              color="primary" 
+              startIcon={<ShoppingCart />} 
               onClick={handleAddToCart}
               ref={buttonRef}
-              sx={{ flex: 1 }}
+              disabled={product.product_quantity < 1}
+              sx={{ flexGrow: 1 }}
             >
               Add to Cart
             </Button>
             <Button 
-              variant="contained" 
+              variant="outlined" 
               color="secondary" 
-              size="large"
               onClick={handleBuyNow}
-              sx={{ flex: 1 }}
+              disabled={product.product_quantity < 1}
+              sx={{ flexGrow: 1 }}
             >
               Buy Now
             </Button>
-            <IconButton color="primary">
-              <Favorite />
-            </IconButton>
-            <IconButton color="primary">
-              <Share />
-            </IconButton>
           </Box>
           
-          {/* Product Details */}
-          <Box sx={{ mb: 3 }}>
-            <Typography variant="h6" sx={{ mb: 1 }}>
-              Product Details:
-            </Typography>
-            <ul>
-              {product.details.map((detail, index) => (
-                <li key={index}>
-                  <Typography variant="body2">{detail}</Typography>
-                </li>
-              ))}
-            </ul>
-          </Box>
-          
-          {/* Promotions */}
-          <Box>
-            <Typography variant="h6" sx={{ mb: 1 }}>
-              Promotions:
-            </Typography>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-              {product.promotions.map((promo, index) => (
-                <Chip key={index} label={promo} color="success" variant="outlined" />
-              ))}
-            </Box>
+          {/* Social/Wishlist Icons */}
+          <Box sx={{ mt: 3, display: 'flex', gap: 1 }}>
+            <Button startIcon={<Favorite />}>Add to Wishlist</Button>
+            <Button startIcon={<Share />}>Share</Button>
           </Box>
         </Grid>
       </Grid>
@@ -354,8 +376,7 @@ const ProductDetail = () => {
         open={openSnackbar} 
         autoHideDuration={3000} 
         onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        sx={{ zIndex: 9999 }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
         <Alert 
           onClose={handleCloseSnackbar} 
@@ -363,7 +384,7 @@ const ProductDetail = () => {
           variant="filled"
           sx={{ width: '100%' }}
         >
-          Đã thêm sản phẩm vào giỏ hàng thành công!
+          Product added to cart!
         </Alert>
       </Snackbar>
     </Container>
