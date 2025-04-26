@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authService } from '../api/auth';
+import { refreshAccessToken } from '../api/config';
 
 // Define types
 interface UserInfo {
@@ -27,6 +28,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<AuthResponse>;
   signup: (name: string, email: string, password: string) => Promise<AuthResponse>;
   logout: () => void;
+  refreshSession: () => Promise<boolean>;
 }
 
 // Create context
@@ -37,15 +39,62 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [user, setUser] = useState<UserInfo | null>(null);
 
-  // Check if user is already logged in (on component mount)
-  useEffect(() => {
+  // Function to update auth state from localStorage
+  const updateAuthFromStorage = () => {
     const token = localStorage.getItem('accessToken');
     const userInfo = localStorage.getItem('userInfo');
     
     if (token && userInfo) {
-      setIsAuthenticated(true);
-      setUser(JSON.parse(userInfo));
+      try {
+        const parsedUserInfo = JSON.parse(userInfo);
+        setUser(parsedUserInfo);
+        setIsAuthenticated(true);
+        return true;
+      } catch (e) {
+        console.error('Error parsing user info from localStorage:', e);
+        return false;
+      }
     }
+    return false;
+  };
+
+  // Function to refresh the session
+  const refreshSession = async (): Promise<boolean> => {
+    try {
+      console.log('[AuthContext] Attempting to refresh session');
+      const refreshed = await refreshAccessToken();
+      
+      if (refreshed) {
+        const success = updateAuthFromStorage();
+        console.log('[AuthContext] Session refresh status:', { refreshed, authStateUpdated: success });
+        return success;
+      }
+      return false;
+    } catch (error) {
+      console.error('[AuthContext] Error refreshing session:', error);
+      return false;
+    }
+  };
+
+  // Check if user is already logged in (on component mount)
+  useEffect(() => {
+    const initAuth = async () => {
+      if (!updateAuthFromStorage()) {
+        // If localStorage doesn't have valid data, try to refresh
+        const token = localStorage.getItem('accessToken');
+        const refreshToken = localStorage.getItem('refreshToken');
+        
+        if (token && refreshToken) {
+          try {
+            await refreshSession();
+          } catch (e) {
+            console.error('Error refreshing session during initialization:', e);
+          }
+        }
+      }
+    };
+    
+    initAuth();
   }, []);
 
   // Login function
@@ -109,6 +158,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // Clear localStorage items
       localStorage.removeItem('userInfo');
       localStorage.removeItem('userId');
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
       
       // Redirect to login page
       window.location.href = '/signin';
@@ -120,6 +171,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setUser(null);
       localStorage.removeItem('userInfo');
       localStorage.removeItem('userId');
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
       
       // Still redirect to login page
       window.location.href = '/signin';
@@ -134,6 +187,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         login,
         signup,
         logout,
+        refreshSession
       }}
     >
       {children}

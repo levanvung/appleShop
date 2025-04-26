@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, Card, CardMedia, CardContent, Button, Box, Snackbar, Alert, CircularProgress } from '@mui/material';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Container, Typography, Card, CardMedia, CardContent, Button, Box, Snackbar, Alert, CircularProgress, Paper } from '@mui/material';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import Carousel from 'react-material-ui-carousel';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { useAuth } from '../../context/AuthContext';
 import { productService, Product } from '../../api/product';
 import './Home.css';
+import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 interface LocationState {
   loginSuccess?: boolean;
@@ -199,7 +201,7 @@ const Home = () => {
             mb={5}
             className="featured-products-title"
           >
-            Sản phẩm nổi bật
+            Danh sách sản phẩm
           </Typography>
 
           {loading ? (
@@ -292,6 +294,95 @@ const Home = () => {
           )}
         </Container>
       </div>
+
+      <Box sx={{ py: 5, backgroundColor: '#f5f5f5' }}>
+        <Container maxWidth="lg">
+          <Box 
+            sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'space-between',
+              mb: 4 
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <LocalFireDepartmentIcon sx={{ color: 'error.main', mr: 1, fontSize: 32 }} />
+              <Typography variant="h4" component="h2" fontWeight="bold">
+                Sản phẩm nổi bật
+              </Typography>
+            </Box>
+            <Button 
+              variant="outlined" 
+              color="primary" 
+              component={Link} 
+              to="/hot-products"
+              endIcon={<ArrowForwardIcon />}
+            >
+              Xem tất cả
+            </Button>
+          </Box>
+          <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 4 }}>
+            Khám phá các sản phẩm được ưa chuộng nhất với ưu đãi đặc biệt
+          </Typography>
+          
+          {/* Hot products promo image */}
+          <Paper 
+            elevation={0}
+            sx={{
+              p: 3,
+              display: 'flex',
+              flexDirection: { xs: 'column', md: 'row' },
+              alignItems: 'center',
+              borderRadius: 2,
+              overflow: 'hidden',
+              backgroundColor: '#ffe8e8',
+              transition: 'transform 0.3s',
+              '&:hover': {
+                transform: 'translateY(-5px)'
+              }
+            }}
+          >
+            <Box sx={{ flex: 1, p: 3 }}>
+              <Typography variant="h3" component="h3" fontWeight="bold" color="error.main" gutterBottom>
+                Sản phẩm HOT
+              </Typography>
+              <Typography variant="h6" component="p" color="text.secondary" sx={{ mb: 3 }}>
+                Khám phá ngay các sản phẩm đang được săn đón nhiều nhất hiện nay!
+              </Typography>
+              <Button 
+                variant="contained" 
+                color="error" 
+                size="large"
+                component={Link}
+                to="/hot-products"
+                endIcon={<ArrowForwardIcon />}
+                sx={{ borderRadius: '30px', px: 3 }}
+              >
+                Khám phá ngay
+              </Button>
+            </Box>
+            <Box 
+              sx={{ 
+                flex: 1, 
+                display: 'flex', 
+                justifyContent: 'center', 
+                p: 2 
+              }}
+            >
+              <img 
+                src="https://substackcdn.com/image/fetch/w_520,h_272,c_fill,f_auto,q_auto:good,fl_progressive:steep,g_auto/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fc5d565fe-8522-40e9-a7f9-77009865ed04_686x386.jpeg" 
+                alt="Hot Products"
+                style={{ 
+                  maxWidth: '100%',
+                  height: 'auto',
+                  borderRadius: '10px',
+                  boxShadow: '0 10px 20px rgba(0,0,0,0.1)'
+                }}
+              />
+            </Box>
+          </Paper>
+        </Container>
+      </Box>
 
       <div className="cta-section">
         <Container maxWidth="md">

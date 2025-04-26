@@ -75,7 +75,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 const menuItems = [
   { text: 'Trang chủ', path: '/' },
   { text: 'Danh mục', path: '/products' },
-  { text: 'Sản phẩm nổi bật', path: '/featured' },
+  { text: 'Sản phẩm nổi bật', path: '/hot-products' },
   { text: 'Về chúng tôi', path: '/about' }
 ];
 

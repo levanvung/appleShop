@@ -1,4 +1,7 @@
 import { apiClient } from './config';
+import axios from 'axios';
+
+const BASE_URL = 'http://localhost:3055/v1/api';
 
 export interface ProductAttribute {
   manufacturer: string;
@@ -27,6 +30,7 @@ export interface Product {
   stock_status?: 'in_stock' | 'out_of_stock';
   isDraft: boolean;
   isPublished: boolean;
+  product_hot: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -67,6 +71,37 @@ export const productService = {
       return response.data;
     } catch (error) {
       console.error(`Error searching products for category ${category}:`, error);
+      throw error;
+    }
+  },
+  
+  getHotProducts: async (): Promise<ProductsResponse> => {
+    try {
+      console.log('Fetching hot products'); // For debugging
+      
+      // Lấy userId và accessToken từ localStorage
+      const userId = localStorage.getItem('userId') || JSON.parse(localStorage.getItem('userInfo') || '{}')._id;
+      const accessToken = localStorage.getItem('accessToken');
+      
+      // Cấu hình headers
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+      
+      if (userId) {
+        headers['x-client-id'] = userId;
+      }
+      
+      if (accessToken) {
+        headers['authorization'] = accessToken;
+      }
+      
+      // Sử dụng axios trực tiếp nhưng vẫn thêm thông tin xác thực
+      const response = await axios.get(`${BASE_URL}/product/hot`, { headers });
+      
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching hot products:', error);
       throw error;
     }
   }

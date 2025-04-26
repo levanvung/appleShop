@@ -15,7 +15,9 @@ import {
   CircularProgress,
   SelectChangeEvent,
   IconButton,
-  Stack
+  Stack,
+  FormControlLabel,
+  Switch
 } from '@mui/material';
 import { apiClient } from '../../../api/config';
 import AddIcon from '@mui/icons-material/Add';
@@ -36,6 +38,7 @@ interface ProductFormData {
   product_images: string[];
   product_quantity: number;
   product_attributes: ProductAttributes;
+  product_hot: boolean;
 }
 
 const initialFormData: ProductFormData = {
@@ -50,7 +53,8 @@ const initialFormData: ProductFormData = {
     manufacturer: '',
     model: '',
     color: ''
-  }
+  },
+  product_hot: false
 };
 
 // Product types
@@ -102,6 +106,15 @@ const ProductManagement: React.FC = () => {
     setFormData({
       ...formData,
       [name]: value
+    });
+  };
+
+  // Handle switch changes (for product_hot)
+  const handleSwitchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    setFormData({
+      ...formData,
+      [name]: checked
     });
   };
 
@@ -362,6 +375,21 @@ const ProductManagement: React.FC = () => {
                 error={!!errors.product_thumb}
                 helperText={errors.product_thumb}
                 required
+              />
+            </Box>
+            
+            {/* Product Hot Switch */}
+            <Box>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={formData.product_hot}
+                    onChange={handleSwitchChange}
+                    name="product_hot"
+                    color="primary"
+                  />
+                }
+                label="Sản phẩm nổi bật (Hot)"
               />
             </Box>
             
