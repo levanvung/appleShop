@@ -259,19 +259,31 @@ const Home = () => {
                       <Typography className="featured-product-description" variant="body2" sx={{ mb: 2 }}>
                         {product.product_description}
                       </Typography>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleProductClick(product._id);
-                        }}
-                        className="featured-product-button"
-                        sx={{ textTransform: 'none' }}
-                      >
-                        <ShoppingCartIcon sx={{ mr: 1 }} />
-                        Xem
-                      </Button>
+                      
+                      {/* Conditional Rendering based on stock_status */}
+                      {product.stock_status === 'out_of_stock' ? (
+                        <Typography 
+                          variant="button" 
+                          color="error" 
+                          sx={{ fontWeight: 'bold', mt: 1 }}
+                        >
+                          Hết hàng !!
+                        </Typography>
+                      ) : (
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleProductClick(product._id);
+                          }}
+                          className="featured-product-button"
+                          sx={{ textTransform: 'none' }}
+                        >
+                          <ShoppingCartIcon sx={{ mr: 1 }} />
+                          Xem
+                        </Button>
+                      )}
                     </CardContent>
                   </Card>
                 </Box>

@@ -9,11 +9,21 @@ import {
   Snackbar,
   Paper,
   Divider,
-  CircularProgress,
-  Alert as MuiAlert
+  Alert as MuiAlert,
+  Card,
+  CardMedia,
+  CardContent
 } from '@mui/material';
-import { AlertProps } from '@mui/material/Alert';
-import { ShoppingCart, Favorite, Share, ArrowBackIos, ArrowForwardIos } from '@mui/icons-material';
+import { 
+  ShoppingCart, 
+  Favorite, 
+  Share, 
+  Star,
+  StarHalf,
+  LocalShipping,
+  VerifiedUser,
+  Update
+} from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import type { CartItem } from '../../context/CartContext';
@@ -21,13 +31,24 @@ import { productService, Product } from '../../api/product';
 import './ProductDetail.css';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
+import Carousel from 'react-material-ui-carousel';
 
-const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
-  props,
-  ref,
-) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
+// Create a simple fallback for motion.div if framer-motion is not available
+const MotionBox = ({ children, style, ...props }: React.ComponentProps<typeof Box>) => {
+  return (
+    <Box 
+      sx={{ 
+        ...style, 
+        opacity: 1, 
+        transform: 'translateY(0)',
+        transition: 'all 0.5s ease-out'
+      }} 
+      {...props}
+    >
+      {children}
+    </Box>
+  );
+};
 
 // Color name mapping for display purposes
 const colorMap: Record<string, string> = {
@@ -35,6 +56,34 @@ const colorMap: Record<string, string> = {
   "#FFFFFF": "White",
   "#6F8FAF": "Steel Blue",
 };
+
+// Sample recommended products
+const recommendedProducts = [
+  {
+    id: '1',
+    name: 'iPhone 13 Pro',
+    image: 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-13-pro-family-hero?wid=940&hei=1112&fmt=png-alpha&.v=1631220221000',
+    price: 27990000,
+  },
+  {
+    id: '2',
+    name: 'AirPods Pro',
+    image: 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/MWP22?wid=1144&hei=1144&fmt=jpeg&qlt=80&.v=1591634795000',
+    price: 4990000,
+  },
+  {
+    id: '3',
+    name: 'Apple Watch Series 7',
+    image: 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/MKUQ3_VW_34FR+watch-45-alum-midnight-nc-7s_VW_34FR_WF_CO?wid=1400&hei=1400&trim=1%2C0&fmt=p-jpg&qlt=95&.v=1632171067000%2C1631661671000',
+    price: 10990000,
+  },
+  {
+    id: '4',
+    name: 'MacBook Air',
+    image: 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/macbook-air-space-gray-select-201810?wid=904&hei=840&fmt=jpeg&qlt=80&.v=1633027804000',
+    price: 28990000,
+  },
+];
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -98,16 +147,6 @@ const ProductDetail = () => {
     // Scroll to top when component mounts
     window.scrollTo(0, 0);
   }, [id]);
-
-  const handlePrevImage = () => {
-    if (!product || !product.product_images || product.product_images.length === 0) return;
-    setSelectedImageIndex(prev => (prev > 0 ? prev - 1 : product.product_images!.length - 1));
-  };
-
-  const handleNextImage = () => {
-    if (!product || !product.product_images || product.product_images.length === 0) return;
-    setSelectedImageIndex(prev => (prev < product.product_images!.length - 1 ? prev + 1 : 0));
-  };
 
   const handleImageSelect = (index: number) => {
     setSelectedImageIndex(index);
@@ -198,6 +237,10 @@ const ProductDetail = () => {
     }
   };
 
+  const handleProductClick = (productId: string) => {
+    navigate(`/product/${productId}`);
+  };
+
   const handleCloseSnackbar = (event?: React.SyntheticEvent | Event, reason?: string) => {
     if (reason === 'clickaway') {
       return;
@@ -215,7 +258,7 @@ const ProductDetail = () => {
     return (
       <div className="product-detail-page">
         <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
-          <CircularProgress sx={{ color: 'white' }} />
+          <Box className="loading-spinner" sx={{ height: 80, width: 80 }}></Box>
         </Container>
       </div>
     );
@@ -265,48 +308,127 @@ const ProductDetail = () => {
   return (
     <div className="product-detail-page">
       <Container maxWidth="xl">
-        <Box className="product-detail-container" sx={{ p: { xs: 2, md: 4 } }}>
+        {/* Main Product Section */}
+        <Box className="product-detail-container" sx={{ p: { xs: 2, md: 4 }, mb: 4 }}>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
             {/* Product Images */}
             <Box sx={{ flex: { xs: '0 0 100%', md: '0 0 calc(50% - 16px)' } }}>
               <Paper elevation={0} className="product-image-paper">
-                <Box className="product-image-container" sx={{ height: 400, display: 'flex', justifyContent: 'center', alignItems: 'center', p: 2 }}>
-                  <img 
-                    src={productImages[selectedImageIndex] || '/images/placeholder.jpg'} 
-                    alt={product.product_name} 
-                    style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} 
-                  />
-                </Box>
+                <Carousel
+                  className="product-carousel"
+                  animation="fade"
+                  interval={5000}
+                  navButtonsAlwaysVisible
+                  indicators={true}
+                  navButtonsProps={{
+                    style: {
+                      backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                      borderRadius: '50%',
+                      color: 'white',
+                      margin: '0 10px',
+                      transition: 'background-color 0.3s ease'
+                    }
+                  }}
+                  indicatorContainerProps={{
+                    style: {
+                      marginTop: '10px',
+                      position: 'relative',
+                      zIndex: 1
+                    }
+                  }}
+                  indicatorIconButtonProps={{
+                    style: {
+                      color: 'rgba(255, 255, 255, 0.5)',
+                      padding: '5px',
+                      transition: 'color 0.3s ease'
+                    }
+                  }}
+                  activeIndicatorIconButtonProps={{
+                    style: {
+                      color: '#2196f3'
+                    }
+                  }}
+                >
+                  {productImages.map((image, index) => (
+                    <Box 
+                      key={index}
+                      className="product-image-container" 
+                      sx={{ 
+                        height: 400, 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center', 
+                        p: 2 
+                      }}
+                    >
+                      <img 
+                        src={image} 
+                        alt={`${product.product_name} ${index + 1}`} 
+                        style={{ 
+                          maxWidth: '100%', 
+                          maxHeight: '100%', 
+                          objectFit: 'contain',
+                          transition: 'transform 0.3s ease'
+                        }} 
+                      />
+                    </Box>
+                  ))}
+                </Carousel>
                 
                 {productImages.length > 1 && (
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2 }}>
-                    <IconButton onClick={handlePrevImage} disabled={productImages.length <= 1} sx={{ color: 'white' }}>
-                      <ArrowBackIos />
-                    </IconButton>
-                    <Box sx={{ display: 'flex', gap: 1, overflowX: 'auto', flexGrow: 1, justifyContent: 'center' }}>
-                      {productImages.map((img, index) => (
-                        <Box 
-                          key={index}
-                          className={`product-thumbnail ${index === selectedImageIndex ? 'active' : ''}`}
-                          sx={{
-                            minWidth: 60,
-                            height: 60,
-                            borderRadius: 1,
-                            overflow: 'hidden'
-                          }}
-                          onClick={() => handleImageSelect(index)}
-                        >
-                          <img 
-                            src={img} 
-                            alt={`${product.product_name} ${index + 1}`} 
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                          />
-                        </Box>
-                      ))}
-                    </Box>
-                    <IconButton onClick={handleNextImage} disabled={productImages.length <= 1} sx={{ color: 'white' }}>
-                      <ArrowForwardIos />
-                    </IconButton>
+                  <Box sx={{ 
+                    display: 'flex', 
+                    gap: 1, 
+                    overflowX: 'auto', 
+                    p: 2, 
+                    justifyContent: 'center',
+                    '&::-webkit-scrollbar': {
+                      height: '6px',
+                    },
+                    '&::-webkit-scrollbar-track': {
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      borderRadius: '3px',
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                      background: 'rgba(255, 255, 255, 0.3)',
+                      borderRadius: '3px',
+                      transition: 'background-color 0.3s ease',
+                      '&:hover': {
+                        background: 'rgba(255, 255, 255, 0.4)',
+                      },
+                    },
+                  }}>
+                    {productImages.map((img, index) => (
+                      <Box 
+                        key={index}
+                        className={`product-thumbnail ${index === selectedImageIndex ? 'active' : ''}`}
+                        sx={{
+                          minWidth: 60,
+                          height: 60,
+                          borderRadius: 1,
+                          overflow: 'hidden',
+                          cursor: 'pointer',
+                          border: index === selectedImageIndex ? '2px solid #2196f3' : '2px solid transparent',
+                          transition: 'all 0.3s ease',
+                          '&:hover': {
+                            transform: 'scale(1.05)',
+                            borderColor: 'rgba(255, 255, 255, 0.5)',
+                          }
+                        }}
+                        onClick={() => handleImageSelect(index)}
+                      >
+                        <img 
+                          src={img} 
+                          alt={`${product.product_name} ${index + 1}`} 
+                          style={{ 
+                            width: '100%', 
+                            height: '100%', 
+                            objectFit: 'cover',
+                            transition: 'transform 0.3s ease'
+                          }} 
+                        />
+                      </Box>
+                    ))}
                   </Box>
                 )}
               </Paper>
@@ -315,139 +437,225 @@ const ProductDetail = () => {
             {/* Product Details */}
             <Box sx={{ flex: { xs: '0 0 100%', md: '0 0 calc(50% - 16px)' } }}>
               <Paper elevation={0} className="product-details-paper">
-                <Typography variant="h4" component="h1" className="product-title" gutterBottom>
-                  {product.product_name}
-                </Typography>
-                
-                <Box sx={{ mb: 2 }}>
-                  <Chip 
-                    label={product.product_type} 
-                    size="small" 
-                    sx={{ 
-                      background: 'rgba(255, 255, 255, 0.1)', 
-                      color: 'white',
-                      fontWeight: 500
-                    }} 
-                  />
-                </Box>
-                
-                <Typography variant="h5" component="p" sx={{ fontWeight: 'bold', my: 2, color: '#2196f3' }}>
-                  {formatPrice(product.product_price)}
-                </Typography>
-                
-                <Typography variant="body1" sx={{ mb: 3, opacity: 0.9 }}>
-                  {product.product_description || 'Không có mô tả'}
-                </Typography>
-                
-                <Divider sx={{ my: 3 }} />
-                
-                {/* Attributes Section */}
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>Chi tiết sản phẩm</Typography>
-                  <Box sx={{ background: 'rgba(255, 255, 255, 0.05)', p: 2, borderRadius: 2 }}>
-                    <Typography variant="body2" sx={{ mb: 1 }}>Nhà sản xuất: {product.product_attributes?.manufacturer || 'N/A'}</Typography>
-                    <Typography variant="body2" sx={{ mb: 1 }}>Model: {product.product_attributes?.model || 'N/A'}</Typography>
-                    {product.product_attributes?.color && !productColors.length && (
-                      <Typography variant="body2">Màu sắc: {product.product_attributes.color}</Typography>
-                    )}
-                  </Box>
-                </Box>
-                
-                {/* Color Selection */}
-                {productColors.length > 0 && (
-                  <Box sx={{ mb: 3 }}>
-                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>
-                      Màu: {colorMap[selectedColor] || selectedColor}
-                    </Typography>
-                    <Box className="color-selector">
-                      {productColors.map((color) => (
-                        <Box
-                          key={color}
-                          className={`color-option ${selectedColor === color ? 'selected' : ''}`}
-                          sx={{
-                            bgcolor: color,
-                          }}
-                          onClick={() => handleColorSelect(color)}
-                        />
-                      ))}
-                    </Box>
-                  </Box>
-                )}
-                
-                {/* Size Selection */}
-                {productSizes.length > 0 && (
-                  <Box sx={{ mb: 3 }}>
-                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>
-                      Size: {selectedSize || 'Chọn kích thước'}
-                    </Typography>
-                    <Box className="size-selector">
-                      {productSizes.map((size) => (
-                        <Chip 
-                          key={size}
-                          label={size}
-                          clickable
-                          onClick={() => handleSizeSelect(size)}
-                          sx={{ 
-                            background: selectedSize === size ? 'rgba(33, 150, 243, 0.4)' : 'rgba(255, 255, 255, 0.1)',
-                            color: 'white',
-                            borderColor: selectedSize === size ? '#2196f3' : 'transparent',
-                            fontWeight: selectedSize === size ? 600 : 400,
-                            '&:hover': {
-                              background: selectedSize === size ? 'rgba(33, 150, 243, 0.6)' : 'rgba(255, 255, 255, 0.2)',
-                            }
-                          }}
-                        />
-                      ))}
-                    </Box>
-                  </Box>
-                )}
-                
-                {/* Quantity */}
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>Số lượng:</Typography>
-                  <Box className="quantity-selector">
-                    <IconButton size="small" onClick={() => handleQuantityChange(-1)} disabled={quantity <= 1}>
-                      <RemoveIcon fontSize="small" />
-                    </IconButton>
-                    <Typography className="quantity-value">{quantity}</Typography>
-                    <IconButton size="small" onClick={() => handleQuantityChange(1)} disabled={quantity >= product.product_quantity}>
-                      <AddIcon fontSize="small" />
-                    </IconButton>
-                  </Box>
-                  <Typography variant="body2" sx={{ mt: 1, opacity: 0.7 }}>
-                    (Còn {product.product_quantity} sản phẩm)
+                <Box className="product-details-info">
+                  <Typography variant="h4" component="h1" className="product-title" gutterBottom>
+                    {product.product_name}
                   </Typography>
-                </Box>
-                
-                {/* Action Buttons */}
-                <Box className="action-buttons">
-                  <Button 
-                    variant="contained" 
-                    startIcon={<ShoppingCart />} 
-                    onClick={handleAddToCart}
-                    ref={buttonRef}
-                    disabled={product.product_quantity < 1}
-                    sx={{ flexGrow: 1 }}
-                  >
-                    Thêm vào giỏ hàng
-                  </Button>
-                  <Button 
-                    variant="outlined" 
-                    onClick={handleBuyNow}
-                    disabled={product.product_quantity < 1}
-                    sx={{ flexGrow: 1 }}
-                  >
-                    Mua ngay
-                  </Button>
-                </Box>
-                
-                {/* Social/Wishlist Icons */}
-                <Box className="social-actions">
-                  <Button startIcon={<Favorite />}>Thêm vào danh sách yêu thích</Button>
-                  <Button startIcon={<Share />}>Chia sẻ</Button>
+                  
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1 }}>
+                    <Box sx={{ display: 'flex', color: '#FFD700' }}>
+                      <Star fontSize="small" />
+                      <Star fontSize="small" />
+                      <Star fontSize="small" />
+                      <Star fontSize="small" />
+                      <StarHalf fontSize="small" />
+                    </Box>
+                    <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                      (142 đánh giá)
+                    </Typography>
+                    <Chip 
+                      label={product.product_type} 
+                      size="small" 
+                      sx={{ 
+                        background: 'rgba(255, 255, 255, 0.1)', 
+                        color: 'white',
+                        fontWeight: 500,
+                        ml: 'auto'
+                      }} 
+                    />
+                  </Box>
+                  
+                  <Typography variant="h5" component="p" sx={{ fontWeight: 'bold', my: 2, color: '#2196f3' }}>
+                    {formatPrice(product.product_price)}
+                  </Typography>
+                  
+                  <Typography variant="body1" sx={{ mb: 3, opacity: 0.9 }}>
+                    {product.product_description || 'Không có mô tả'}
+                  </Typography>
+                  
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 3 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <LocalShipping sx={{ color: '#4caf50' }} />
+                      <Typography variant="body2">Giao hàng miễn phí</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <VerifiedUser sx={{ color: '#2196f3' }} />
+                      <Typography variant="body2">Bảo hành 12 tháng</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Update sx={{ color: '#ff9800' }} />
+                      <Typography variant="body2">Đổi trả trong 30 ngày</Typography>
+                    </Box>
+                  </Box>
+                  
+                  <Divider sx={{ my: 3 }} />
+                  
+                  {/* Attributes Section */}
+                  <Box sx={{ mb: 3 }}>
+                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>Chi tiết sản phẩm</Typography>
+                    <Box sx={{ background: 'rgba(255, 255, 255, 0.05)', p: 2, borderRadius: 2 }}>
+                      <Typography variant="body2" sx={{ mb: 1 }}>Nhà sản xuất: {product.product_attributes?.manufacturer || 'N/A'}</Typography>
+                      <Typography variant="body2" sx={{ mb: 1 }}>Model: {product.product_attributes?.model || 'N/A'}</Typography>
+                      {product.product_attributes?.color && !productColors.length && (
+                        <Typography variant="body2">Màu sắc: {product.product_attributes.color}</Typography>
+                      )}
+                    </Box>
+                  </Box>
+                  
+                  {/* Color Selection */}
+                  {productColors.length > 0 && (
+                    <Box sx={{ mb: 3 }}>
+                      <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>
+                        Màu: {colorMap[selectedColor] || selectedColor}
+                      </Typography>
+                      <Box className="color-selector">
+                        {productColors.map((color) => (
+                          <Box
+                            key={color}
+                            className={`color-option ${selectedColor === color ? 'selected' : ''}`}
+                            sx={{
+                              bgcolor: color,
+                            }}
+                            onClick={() => handleColorSelect(color)}
+                          />
+                        ))}
+                      </Box>
+                    </Box>
+                  )}
+                  
+                  {/* Size Selection */}
+                  {productSizes.length > 0 && (
+                    <Box sx={{ mb: 3 }}>
+                      <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>
+                        Size: {selectedSize || 'Chọn kích thước'}
+                      </Typography>
+                      <Box className="size-selector">
+                        {productSizes.map((size) => (
+                          <Chip 
+                            key={size}
+                            label={size}
+                            clickable
+                            onClick={() => handleSizeSelect(size)}
+                            sx={{ 
+                              background: selectedSize === size ? 'rgba(33, 150, 243, 0.4)' : 'rgba(255, 255, 255, 0.1)',
+                              color: 'white',
+                              borderColor: selectedSize === size ? '#2196f3' : 'transparent',
+                              fontWeight: selectedSize === size ? 600 : 400,
+                              '&:hover': {
+                                background: selectedSize === size ? 'rgba(33, 150, 243, 0.6)' : 'rgba(255, 255, 255, 0.2)',
+                              }
+                            }}
+                          />
+                        ))}
+                      </Box>
+                    </Box>
+                  )}
+                  
+                  {/* Quantity */}
+                  <Box sx={{ mb: 3 }}>
+                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>Số lượng:</Typography>
+                    <Box className="quantity-selector">
+                      <IconButton size="small" onClick={() => handleQuantityChange(-1)} disabled={quantity <= 1}>
+                        <RemoveIcon fontSize="small" />
+                      </IconButton>
+                      <Typography className="quantity-value">{quantity}</Typography>
+                      <IconButton size="small" onClick={() => handleQuantityChange(1)} disabled={quantity >= product.product_quantity}>
+                        <AddIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
+                    <Typography variant="body2" sx={{ mt: 1, opacity: 0.7 }}>
+                      (Còn {product.product_quantity} sản phẩm)
+                    </Typography>
+                  </Box>
+                  
+                  {/* Action Buttons */}
+                  <Box className="action-buttons">
+                    <Button 
+                      variant="contained" 
+                      startIcon={<ShoppingCart />} 
+                      onClick={handleAddToCart}
+                      ref={buttonRef}
+                      disabled={product.product_quantity < 1}
+                      sx={{ flexGrow: 1 }}
+                    >
+                      Thêm vào giỏ hàng
+                    </Button>
+                    <Button 
+                      variant="outlined" 
+                      onClick={handleBuyNow}
+                      disabled={product.product_quantity < 1}
+                      sx={{ flexGrow: 1 }}
+                    >
+                      Mua ngay
+                    </Button>
+                  </Box>
+                  
+                  {/* Social/Wishlist Icons */}
+                  <Box className="social-actions">
+                    <Button startIcon={<Favorite />}>Thêm vào danh sách yêu thích</Button>
+                    <Button startIcon={<Share />}>Chia sẻ</Button>
+                  </Box>
                 </Box>
               </Paper>
             </Box>
+          </Box>
+        </Box>
+
+        {/* Recommended Products Section */}
+        <Box className="product-detail-container" sx={{ p: { xs: 2, md: 4 }, mb: 4 }}>
+          <Typography variant="h5" component="h2" sx={{ 
+            mb: 3, 
+            color: 'white', 
+            fontWeight: 600,
+            textAlign: 'center'
+          }}>
+            Sản Phẩm Đề Xuất
+          </Typography>
+          
+          <Box sx={{ 
+            display: 'flex', 
+            flexWrap: 'wrap', 
+            gap: 2, 
+            justifyContent: 'center'
+          }}>
+            {recommendedProducts.map((product) => (
+              <MotionBox
+                key={product.id}
+                style={{ flex: '1 1 200px', maxWidth: '280px' }}
+              >
+                <Card 
+                  sx={{ 
+                    background: 'rgba(0, 0, 0, 0.4)',
+                    backdropFilter: 'blur(5px)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: 2,
+                    transition: 'all 0.3s ease',
+                    cursor: 'pointer',
+                    '&:hover': {
+                      transform: 'translateY(-5px)',
+                      boxShadow: '0 10px 20px rgba(0, 0, 0, 0.3)'
+                    }
+                  }}
+                  onClick={() => handleProductClick(product.id)}
+                >
+                  <CardMedia
+                    component="img"
+                    height="160"
+                    image={product.image}
+                    alt={product.name}
+                    sx={{ padding: 2, objectFit: 'contain' }}
+                  />
+                  <CardContent sx={{ p: 2, pt: 1 }}>
+                    <Typography gutterBottom variant="body1" component="div" sx={{ color: 'white', fontWeight: 500 }}>
+                      {product.name}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: '#2196f3', fontWeight: 'bold' }}>
+                      {formatPrice(product.price)}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </MotionBox>
+            ))}
           </Box>
         </Box>
       </Container>
@@ -459,14 +667,14 @@ const ProductDetail = () => {
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert 
+        <MuiAlert 
           onClose={handleCloseSnackbar} 
           severity={snackbarSeverity} 
           variant="filled"
           sx={{ width: '100%' }}
         >
           {snackbarMessage}
-        </Alert>
+        </MuiAlert>
       </Snackbar>
     </div>
   );

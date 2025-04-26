@@ -9,6 +9,7 @@ import Categories from './views/Products/Categories';
 import ProductList from './views/Products/ProductList';
 import ProductDetail from './views/ProductDetail/ProductDetail';
 import About from './views/About/About';
+import Checkout from './views/Checkout/Checkout';
 import ProductManagement from './views/Admin/Products/ProductManagement';
 import AdminRoute from './components/ProtectedRoute/AdminRoute';
 import { CartProvider } from './context/CartContext';
@@ -59,6 +60,7 @@ function App() {
                   <Route path="/products/:category" element={<ProductList />} />
                   <Route path="/product/:id" element={<ProductDetail />} />
                   <Route path="/about" element={<About />} />
+                  <Route path="/checkout" element={<Checkout />} />
                   <Route path="/admin/products" element={
                     <AdminRoute>
                       <ProductManagement />

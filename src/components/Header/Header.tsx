@@ -101,6 +101,9 @@ const Header = () => {
   // Kiểm tra người dùng có phải là ADMIN hay không
   const isAdmin = user?.roles?.includes('ADMIN');
   
+  // For debugging - log user data
+  console.log('User data in Header:', { user, isAdmin, roles: user?.roles });
+  
   // Handle drawer toggle
   const toggleDrawer = (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
     if (
@@ -302,6 +305,19 @@ const Header = () => {
     <>
       <AppBar position="sticky" sx={{ backgroundColor: 'black' }}>
         <Toolbar>
+          {/* Mobile Menu Button */}
+          {isMobile && (
+            <IconButton
+              edge="start"
+              color="inherit"
+              aria-label="menu"
+              onClick={toggleDrawer(true)}
+              sx={{ mr: 1 }}
+            >
+              <MenuIcon />
+            </IconButton>
+          )}
+        
           {/* Logo */}
           <Typography
             variant="h6"
@@ -311,7 +327,9 @@ const Header = () => {
               color: 'white',
               textDecoration: 'none',
               fontWeight: 'bold',
-              mr: 2
+              mr: 1,
+              ml: isMobile ? 0 : -1,
+              fontSize: isMobile ? '1.1rem' : '1.25rem'
             }}
           >
             APPLE STORE
@@ -319,7 +337,11 @@ const Header = () => {
 
           {/* Desktop Menu */}
           {!isMobile && (
-            <Box sx={{ display: 'flex', gap: 2 }}>
+            <Box sx={{ 
+              display: 'flex', 
+              gap: 1,
+              ml: -1
+            }}>
               {menuItems.map((item) => (
                 <Link
                   key={item.text}
@@ -329,11 +351,23 @@ const Header = () => {
                   {item.text}
                 </Link>
               ))}
+              
+              {/* Admin menu items in desktop view */}
+              {isAdmin && adminMenuItems.map((item) => (
+                <Link
+                  key={item.text}
+                  to={item.path}
+                  className={`nav-link admin-link ${isActive(item.path) ? 'active' : ''}`}
+                  style={{ color: '#f50057' }}
+                >
+                  {item.text}
+                </Link>
+              ))}
             </Box>
           )}
           
           {/* Search Bar */}
-          <Search sx={{ display: { xs: 'none', sm: 'block' } }}>
+          <Search sx={{ display: { xs: 'none', sm: 'block' }, ml: 'auto', mr: 2 }}>
             <SearchIconWrapper>
               <SearchIcon />
             </SearchIconWrapper>

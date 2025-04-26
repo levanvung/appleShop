@@ -15,10 +15,12 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import './Cart.css';
 
 const Cart = () => {
+  const navigate = useNavigate();
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   
@@ -109,6 +111,12 @@ const Cart = () => {
   // Đóng thông báo
   const handleCloseSnackbar = () => {
     setSnackbarOpen(false);
+  };
+
+  // Hàm xử lý khi nhấn nút Checkout
+  const handleCheckout = () => {
+    closeCart(); // Đóng giỏ hàng trước khi chuyển trang
+    navigate('/checkout');
   };
 
   return (
@@ -228,6 +236,7 @@ const Cart = () => {
                   variant="contained" 
                   fullWidth 
                   sx={{ mt: 2, py: 1.5, borderRadius: 3 }}
+                  onClick={handleCheckout}
                 >
                   Checkout
                 </Button>

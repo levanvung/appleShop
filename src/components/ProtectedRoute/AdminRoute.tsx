@@ -11,12 +11,10 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   const isAdmin = user?.roles?.includes('ADMIN');
 
   if (!isAuthenticated) {
-    // Redirect to sign in page with return URL
     return <Navigate to="/signin" state={{ from: window.location.pathname }} />;
   }
 
   if (!isAdmin) {
-    // Not an admin, redirect to home
     return <Navigate to="/" />;
   }
 

@@ -32,6 +32,7 @@ export interface CartItem {
 // Định nghĩa kiểu dữ liệu cho context
 interface CartContextType {
   cartItems: CartItem[];
+  cart: CartItem[]; // Alias for cartItems to match with Checkout component
   cartCount: number;
   isCartOpen: boolean;
   addToCart: (item: CartItem) => Promise<{ success: boolean; message?: string }>;
@@ -42,6 +43,7 @@ interface CartContextType {
   toggleCart: () => void;
   closeCart: () => void;
   fetchCart: () => Promise<void>;
+  clearCart: () => void; // Add clearCart function
   isLoading: boolean;
 }
 
@@ -240,8 +242,14 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     setIsCartOpen(false);
   };
 
+  const clearCart = () => {
+    setCartItems([]);
+    setIsCartOpen(false);
+  };
+
   const value = {
     cartItems,
+    cart: cartItems,
     cartCount,
     isCartOpen,
     addToCart,
@@ -252,6 +260,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     toggleCart,
     closeCart,
     fetchCart,
+    clearCart,
     isLoading
   };
 

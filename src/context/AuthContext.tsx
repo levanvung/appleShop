@@ -53,6 +53,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const response = await authService.login({ email, password });
       
+      console.log('Login response in AuthContext:', response);
+      
       if (response.metadata?.shop) {
         setUser(response.metadata.shop);
         setIsAuthenticated(true);
@@ -60,6 +62,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         // Save user info to localStorage
         localStorage.setItem('userInfo', JSON.stringify(response.metadata.shop));
         localStorage.setItem('userId', response.metadata.shop._id);
+        
+        // Debug log for user roles
+        console.log('User after login:', { 
+          user: response.metadata.shop,
+          roles: response.metadata.shop.roles,
+          hasAdminRole: response.metadata.shop.roles?.includes('ADMIN')
+        });
       }
       
       return response;

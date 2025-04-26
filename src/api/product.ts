@@ -24,6 +24,7 @@ export interface Product {
   product_images?: string[]; // Optional array of images
   product_colors?: string[]; // Optional array of colors
   product_sizes?: string[];  // Optional array of sizes
+  stock_status?: 'in_stock' | 'out_of_stock';
   isDraft: boolean;
   isPublished: boolean;
   createdAt: string;

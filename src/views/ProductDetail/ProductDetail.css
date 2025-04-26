@@ -5,6 +5,16 @@
   background: url('https://wallpapers.com/images/featured/iphone-8-uz9asuziw85d4hh9.jpg') no-repeat center center;
   background-size: cover;
   background-attachment: fixed;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+  }
+  to { 
+    opacity: 1; 
+  }
 }
 
 .product-detail-page::before {
@@ -39,6 +49,14 @@
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  transform: translateY(20px);
+  animation: slideUp 0.6s ease-out forwards;
+}
+
+@keyframes slideUp {
+  to {
+    transform: translateY(0);
+  }
 }
 
 .product-image-paper {
@@ -46,6 +64,7 @@
   backdrop-filter: blur(5px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   overflow: hidden;
+  animation: fadeInDelay 0.8s ease-in-out;
 }
 
 .product-details-paper {
@@ -54,11 +73,23 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 30px;
   height: 100%;
+  animation: fadeInDelay 1s ease-in-out;
+}
+
+@keyframes fadeInDelay {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 .product-image-container {
   width: 100%;
-  aspect-ratio: 1 / 1;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -67,8 +98,25 @@
   transition: all 0.3s ease;
 }
 
+.product-image-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle, transparent 50%, rgba(0, 0, 0, 0.3) 100%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.product-image-container:hover::after {
+  opacity: 1;
+}
+
 .product-image-container img {
   transition: transform 0.5s ease;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
 }
 
 .product-image-container:hover img {
@@ -79,6 +127,25 @@
   transition: all 0.3s ease;
   cursor: pointer;
   border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.product-thumbnail::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.2);
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.product-thumbnail.active::before,
+.product-thumbnail:hover::before {
+  opacity: 0;
 }
 
 .product-thumbnail.active {
@@ -88,6 +155,7 @@
 
 .product-thumbnail:hover {
   transform: scale(1.05);
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 .product-title {
@@ -100,6 +168,18 @@
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
   margin-bottom: 20px;
   display: inline-block;
+  animation: titleShine 2s infinite alternate-reverse;
+}
+
+@keyframes titleShine {
+  from {
+    background-position: left;
+    background-size: 200%;
+  }
+  to {
+    background-position: right;
+    background-size: 200%;
+  }
 }
 
 .color-selector {
@@ -115,6 +195,12 @@
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.color-option:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .color-option.selected::after {
@@ -144,6 +230,28 @@
   padding: 5px 15px;
   width: fit-content;
   margin-top: 10px;
+  position: relative;
+  overflow: hidden;
+}
+
+.quantity-selector::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
+}
+
+.quantity-selector::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
 }
 
 .quantity-selector button {
@@ -152,6 +260,15 @@
   border-radius: 50%;
   min-width: 36px;
   height: 36px;
+  transition: all 0.2s ease;
+}
+
+.quantity-selector button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.quantity-selector button:disabled {
+  opacity: 0.4;
 }
 
 .quantity-selector .quantity-value {
@@ -179,6 +296,28 @@
 .action-buttons .MuiButton-contained {
   background: linear-gradient(45deg, #2196f3, #2979ff);
   box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.action-buttons .MuiButton-contained::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transition: left 0.7s ease;
+}
+
+.action-buttons .MuiButton-contained:hover::before {
+  left: 100%;
 }
 
 .action-buttons .MuiButton-contained:hover {
@@ -190,11 +329,39 @@
 .action-buttons .MuiButton-outlined {
   border: 2px solid #e91e63;
   color: #e91e63;
+  position: relative;
+  overflow: hidden;
+}
+
+.action-buttons .MuiButton-outlined::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(233, 30, 99, 0) 0%,
+    rgba(233, 30, 99, 0.1) 50%,
+    rgba(233, 30, 99, 0) 100%
+  );
+  transition: left 0.7s ease;
+}
+
+.action-buttons .MuiButton-outlined:hover::before {
+  left: 100%;
 }
 
 .action-buttons .MuiButton-outlined:hover {
   background: rgba(233, 30, 99, 0.1);
   transform: translateY(-2px);
+}
+
+.action-buttons .MuiButton-root:disabled {
+  opacity: 0.6;
+  background: #555;
+  transform: none;
 }
 
 .social-actions {
@@ -209,10 +376,20 @@
   background: rgba(255, 255, 255, 0.1);
   color: white;
   text-transform: none;
+  transition: all 0.3s ease;
 }
 
 .social-actions .MuiButton-root:hover {
   background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.social-actions .MuiButton-startIcon {
+  transition: transform 0.3s ease;
+}
+
+.social-actions .MuiButton-root:hover .MuiButton-startIcon {
+  transform: scale(1.2);
 }
 
 @keyframes pulse {
@@ -239,8 +416,63 @@
   opacity: 1;
 }
 
+/* Product details animation */
+.product-details-info {
+  transform: translateY(20px);
+  opacity: 0;
+  animation: slideUpFade 0.5s ease forwards;
+  animation-delay: 0.3s;
+}
+
+@keyframes slideUpFade {
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive styles */
 @media (max-width: 768px) {
   .product-image-container {
     aspect-ratio: 4 / 3;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+  }
+  
+  .product-detail-container {
+    padding: 15px !important;
+  }
+  
+  .product-details-paper {
+    padding: 20px;
+  }
+  
+  .social-actions {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+} 
+
+/* Loading animation */
+.loading-spinner {
+  position: relative;
+}
+
+.loading-spinner::after {
+  content: '';
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: #2196f3;
+  animation: spinner 1s infinite linear;
+}
+
+@keyframes spinner {
+  to {
+    transform: rotate(360deg);
   }
 } 
