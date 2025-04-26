@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { 
   AppBar, 
   Toolbar, 
@@ -85,6 +85,7 @@ const adminMenuItems = [
 ];
 
 const Header = () => {
+  const location = useLocation();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
   const [notification, setNotification] = useState<{show: boolean, message: string}>({
@@ -155,6 +156,11 @@ const Header = () => {
     });
   };
   
+  // Function to check if a menu item is active
+  const isActive = (path: string) => {
+    return location.pathname === path;
+  };
+  
   // Mobile menu drawer
   const mobileMenuDrawer = (
     <Drawer
@@ -186,6 +192,7 @@ const Header = () => {
               component={Link} 
               to={item.path}
               onClick={toggleDrawer(false)}
+              className={`mobile-menu-item ${isActive(item.path) ? 'active' : ''}`}
               sx={{ py: 2 }}
             >
               <ListItemText primary={item.text} />
@@ -203,6 +210,7 @@ const Header = () => {
                   component={Link} 
                   to={item.path}
                   onClick={toggleDrawer(false)}
+                  className={`mobile-menu-item ${isActive(item.path) ? 'active' : ''}`}
                   sx={{ py: 2, color: '#f50057' }}
                 >
                   <ListItemText primary={item.text} />
@@ -236,6 +244,7 @@ const Header = () => {
                 component={Link} 
                 to="/signin"
                 onClick={toggleDrawer(false)}
+                className={`mobile-menu-item ${isActive('/signin') ? 'active' : ''}`}
                 sx={{ py: 2 }}
               >
                 <ListItemText primary="Đăng nhập" />
@@ -246,6 +255,7 @@ const Header = () => {
                 component={Link} 
                 to="/signup"
                 onClick={toggleDrawer(false)}
+                className={`mobile-menu-item ${isActive('/signup') ? 'active' : ''}`}
                 sx={{ py: 2 }}
               >
                 <ListItemText primary="Đăng ký" />
@@ -290,73 +300,34 @@ const Header = () => {
   
   return (
     <>
-      <AppBar position="static" className="header" sx={{ 
-        backgroundColor: 'black', 
-        width: '100%', 
-        boxShadow: 'none',
-        padding: 0,
-        borderRadius: 0
-      }}>
-        <Toolbar sx={{ width: '100%', maxWidth: '100%', padding: { xs: '0 16px', md: '0 24px' } }}>
-          {/* Mobile Menu Icon */}
-          {isMobile && (
-            <IconButton
-              edge="start"
-              color="inherit"
-              aria-label="menu"
-              onClick={toggleDrawer(true)}
-              sx={{ mr: 2 }}
-            >
-              <MenuIcon />
-            </IconButton>
-          )}
-          
+      <AppBar position="sticky" sx={{ backgroundColor: 'black' }}>
+        <Toolbar>
           {/* Logo */}
           <Typography
             variant="h6"
-            noWrap
             component={Link}
             to="/"
-            sx={{ 
-              display: { xs: 'block', sm: 'block' }, 
-              textDecoration: 'none', 
+            sx={{
               color: 'white',
-              mr: 2,
-              flexGrow: isMobile ? 1 : 0
+              textDecoration: 'none',
+              fontWeight: 'bold',
+              mr: 2
             }}
           >
             APPLE STORE
           </Typography>
-          
-          {/* Desktop Navigation */}
+
+          {/* Desktop Menu */}
           {!isMobile && (
-            <Box sx={{ display: 'flex', flexGrow: 1 }}>
+            <Box sx={{ display: 'flex', gap: 2 }}>
               {menuItems.map((item) => (
-                <Typography 
+                <Link
                   key={item.text}
-                  component={Link} 
-                  to={item.path} 
-                  sx={{ color: 'white', textDecoration: 'none', marginRight: '20px' }}
+                  to={item.path}
+                  className={`nav-link ${isActive(item.path) ? 'active' : ''}`}
                 >
                   {item.text}
-                </Typography>
-              ))}
-              
-              {/* Admin menu items */}
-              {isAdmin && adminMenuItems.map((item) => (
-                <Typography 
-                  key={item.text}
-                  component={Link} 
-                  to={item.path} 
-                  sx={{ 
-                    color: '#f50057', 
-                    textDecoration: 'none', 
-                    marginRight: '20px',
-                    fontWeight: 'bold'
-                  }}
-                >
-                  {item.text}
-                </Typography>
+                </Link>
               ))}
             </Box>
           )}

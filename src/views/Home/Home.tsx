@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, Grid, Card, CardMedia, CardContent, Button, Box, Snackbar, Alert, CircularProgress } from '@mui/material';
+import { Container, Typography, Card, CardMedia, CardContent, Button, Box, Snackbar, Alert, CircularProgress } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
+import Carousel from 'react-material-ui-carousel';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { useAuth } from '../../context/AuthContext';
 import { productService, Product } from '../../api/product';
 import './Home.css';
@@ -8,6 +10,15 @@ import './Home.css';
 interface LocationState {
   loginSuccess?: boolean;
   signupSuccess?: boolean;
+}
+
+interface BannerItem {
+  id: number;
+  image: string;
+  title: string;
+  description: string;
+  buttonText: string;
+  buttonLink: string;
 }
 
 const Home = () => {
@@ -28,13 +39,38 @@ const Home = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
 
-  // Fetch products
+  const bannerItems: BannerItem[] = [
+    {
+      id: 1,
+      image: 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-card-40-iphone15prohero-202309?wid=680&hei=528&fmt=p-jpg&qlt=95&.v=1693086290312',
+      title: 'iPhone 15 Pro',
+      description: 'Trải nghiệm điện thoại cao cấp với công nghệ đỉnh cao',
+      buttonText: 'Mua ngay',
+      buttonLink: '/products/iphone'
+    },
+    {
+      id: 2,
+      image: 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/ipad-card-40-pro-202210?wid=680&hei=528&fmt=p-jpg&qlt=95&.v=1664578794100',
+      title: 'iPad Pro',
+      description: 'Mạnh mẽ và linh hoạt, iPad Pro mới với chip M2',
+      buttonText: 'Khám phá',
+      buttonLink: '/products/ipad'
+    },
+    {
+      id: 3,
+      image: 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/macbook-air-og-202306?wid=1200&hei=630&fmt=jpeg&qlt=95&.v=1683845836458',
+      title: 'MacBook Air',
+      description: 'Mỏng nhẹ và mạnh mẽ với thời lượng pin cả ngày',
+      buttonText: 'Tìm hiểu thêm',
+      buttonLink: '/products/macbook'
+    }
+  ];
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
         const response = await productService.getPublishedProducts();
-        // Kiểm tra và chuyển đổi metadata thành mảng
         if (response.metadata) {
           const productsData = Array.isArray(response.metadata) 
             ? response.metadata 
@@ -54,7 +90,6 @@ const Home = () => {
     fetchProducts();
   }, []);
 
-  // Check if user came from login/signup
   useEffect(() => {
     const state = location.state as LocationState;
     
@@ -64,8 +99,6 @@ const Home = () => {
         message: `Đăng nhập thành công! Chào mừng ${user.name || 'bạn'} quay trở lại.`,
         type: 'success'
       });
-      
-      // Clear the state to prevent showing notification again on refresh
       window.history.replaceState({}, document.title);
     } else if (state?.signupSuccess && user) {
       setNotification({
@@ -73,8 +106,6 @@ const Home = () => {
         message: `Đăng ký thành công! Chào mừng ${user.name || 'bạn'} đến với Apple Store.`,
         type: 'success'
       });
-      
-      // Clear the state to prevent showing notification again on refresh
       window.history.replaceState({}, document.title);
     }
   }, [location, user]);
@@ -86,93 +117,169 @@ const Home = () => {
     });
   };
 
-  // Function to handle product click
   const handleProductClick = (productId: string) => {
     navigate(`/product/${productId}`);
   };
 
-  // Format price with Vietnamese currency
+  const handleBannerButtonClick = (link: string) => {
+    navigate(link);
+  };
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
   };
 
   return (
     <div className="home" style={{ width: '100%', maxWidth: '100%' }}>
-      <div className="hero-section">
-        <Container maxWidth={false} sx={{ width: '100%', maxWidth: '100%' }}>
-          <Box className="hero-content" sx={{ mx: 'auto', px: 3 }}>
-            <Typography variant="h2" component="h1" gutterBottom>
-              Thiết bị di động cao cấp
-            </Typography>
-            <Typography variant="h5" component="h2" gutterBottom>
-              Trải nghiệm công nghệ đỉnh cao với những sản phẩm chất lượng
-            </Typography>
-            <Button variant="contained" color="primary" size="large">
-              Khám phá ngay
-            </Button>
-          </Box>
-        </Container>
+      <div className="banner-slider">
+        <Carousel
+          animation="fade"
+          autoPlay
+          indicators
+          navButtonsAlwaysVisible
+          interval={6000}
+          duration={1000}
+          swipe
+          sx={{ width: '100%' }}
+        >
+          {bannerItems.map((item) => (
+            <div key={item.id} className="banner-item">
+              <Box 
+                sx={{
+                  backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.5)), url(${item.image})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  height: '500px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '100%',
+                  transition: 'all 0.5s ease-in-out'
+                }}
+              >
+                <Container maxWidth="md">
+                  <Box className="banner-content" sx={{ textAlign: 'center', color: 'white' }}>
+                    <Typography variant="h2" component="h1" gutterBottom>
+                      {item.title}
+                    </Typography>
+                    <Typography variant="h5" component="h2" gutterBottom sx={{ mb: 4 }}>
+                      {item.description}
+                    </Typography>
+                    <Button 
+                      variant="contained" 
+                      color="primary" 
+                      size="large"
+                      onClick={() => handleBannerButtonClick(item.buttonLink)}
+                      className="banner-button"
+                      sx={{
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          transform: 'translateY(-3px)',
+                          boxShadow: '0 6px 10px rgba(0, 0, 0, 0.3)'
+                        }
+                      }}
+                    >
+                      {item.buttonText}
+                    </Button>
+                  </Box>
+                </Container>
+              </Box>
+            </div>
+          ))}
+        </Carousel>
       </div>
 
-      <Container maxWidth="xl" sx={{ py: 8, px: { xs: 3, md: 4 } }}>
-        <Typography variant="h4" component="h2" gutterBottom textAlign="center" mb={5}>
-          Sản phẩm nổi bật
-        </Typography>
+      <div className="featured-products-section">
+        <Container maxWidth="xl" sx={{ py: 8, px: { xs: 3, md: 4 } }}>
+          <Typography 
+            variant="h3" 
+            component="h2" 
+            gutterBottom 
+            textAlign="center" 
+            mb={5}
+            className="featured-products-title"
+          >
+            Sản phẩm nổi bật
+          </Typography>
 
-        {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', my: 5 }}>
-            <CircularProgress />
-          </Box>
-        ) : error ? (
-          <Alert severity="error" sx={{ my: 3 }}>{error}</Alert>
-        ) : products.length === 0 ? (
-          <Alert severity="info" sx={{ my: 3 }}>Không có sản phẩm nào.</Alert>
-        ) : (
-          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-            <Grid container spacing={4} justifyContent="center" sx={{ mx: 'auto' }}>
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', my: 5 }}>
+              <CircularProgress />
+            </Box>
+          ) : error ? (
+            <Alert severity="error" sx={{ my: 3 }}>{error}</Alert>
+          ) : products.length === 0 ? (
+            <Alert severity="info" sx={{ my: 3 }}>Không có sản phẩm nào.</Alert>
+          ) : (
+            <Box 
+              sx={{ 
+                width: '100%',
+                display: 'flex',
+                flexWrap: 'wrap',
+                margin: '-16px'
+              }}
+            >
               {products.map((product) => (
-                <Grid 
-                  item
-                  component="div"
-                  key={product._id} 
-                  xs={12} 
-                  sm={6} 
-                  md={3}
+                <Box
+                  key={product._id}
+                  sx={{
+                    width: {
+                      xs: '100%',
+                      sm: '50%',
+                      md: '25%'
+                    },
+                    padding: '16px',
+                    boxSizing: 'border-box'
+                  }}
                 >
                   <Card 
-                    className="product-card"
+                    className="featured-product-card"
                     onClick={() => handleProductClick(product._id)}
-                    sx={{ cursor: 'pointer', height: '100%', display: 'flex', flexDirection: 'column' }}
+                    sx={{ 
+                      width: '100%',
+                      cursor: 'pointer', 
+                      height: '100%', 
+                      display: 'flex', 
+                      flexDirection: 'column'
+                    }}
                   >
                     <CardMedia
                       component="img"
                       image={product.product_thumb || `https://placehold.co/300x200/333/fff?text=${encodeURIComponent(product.product_name)}`}
                       alt={product.product_name}
-                      sx={{ height: 200, objectFit: 'contain' }}
+                      sx={{ height: 300, objectFit: 'contain', padding: '16px', backgroundColor: '#000' }}
                     />
-                    <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                      <Typography variant="body2" color="text.secondary" gutterBottom>
-                        {product.product_type}
-                      </Typography>
-                      <Typography variant="h6" component="h3" sx={{ flexGrow: 1 }}>
-                        {product.product_name}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary" sx={{ mt: 1, minHeight: '40px' }}>
-                        {product.product_description && product.product_description.length > 60 
-                          ? `${product.product_description.substring(0, 60)}...` 
-                          : product.product_description || 'Không có mô tả'}
-                      </Typography>
-                      <Typography variant="body1" color="text.primary" sx={{ fontWeight: 'bold', mt: 1 }}>
+                    <CardContent className="featured-product-info" sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', backgroundColor: 'transparent !important' }}>
+                      <Typography className="featured-product-price" variant="h6" component="h3" sx={{ fontWeight: 'bold', mb: 1 }}>
                         {formatPrice(product.product_price)}
                       </Typography>
+                      <Typography className="featured-product-title" variant="body1" sx={{ mb: 1 }}>
+                        {product.product_name}
+                      </Typography>
+                      <Typography className="featured-product-description" variant="body2" sx={{ mb: 2 }}>
+                        {product.product_description}
+                      </Typography>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleProductClick(product._id);
+                        }}
+                        className="featured-product-button"
+                        sx={{ textTransform: 'none' }}
+                      >
+                        <ShoppingCartIcon sx={{ mr: 1 }} />
+                        Xem
+                      </Button>
                     </CardContent>
                   </Card>
-                </Grid>
+                </Box>
               ))}
-            </Grid>
-          </Box>
-        )}
-      </Container>
+            </Box>
+          )}
+        </Container>
+      </div>
 
       <div className="cta-section">
         <Container maxWidth="md">
@@ -206,4 +313,4 @@ const Home = () => {
   );
 };
 
-export default Home; 
+export default Home;

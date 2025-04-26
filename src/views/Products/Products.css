@@ -7,14 +7,32 @@
 
 /* Categories Page Styles */
 .categories-page {
+  position: relative;
   min-height: 100vh;
-  width: 100%;
-  background-color: #000;
-  padding: 30px 0;
-  color: #fff;
+  padding: 40px 0;
+  background-image: url('https://wallpapers.com/images/featured/iphone-8-uz9asuziw85d4hh9.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+}
+
+.categories-page::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 1;
+}
+
+.categories-page > * {
+  position: relative;
+  z-index: 2;
 }
 
 /* Grid layout fixes */
@@ -71,102 +89,100 @@
 
 /* Category Card Styles */
 .category-card {
-  height: 100%;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 15px !important;
-  background-color: #fff !important;
   color: #000;
   box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-  transition: all 0.3s ease;
-  overflow: hidden;
-  position: relative;
-  cursor: pointer;
+  width: 100%;
+  height: 100%;
+  margin: 0 !important;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  width: 100%;
-  margin: 0 auto !important;
-  box-sizing: border-box !important;
-}
-
-.category-card-large {
-  min-height: 350px;
-  width: 100% !important;
-  flex-grow: 1;
-}
-
-.category-card-small {
-  min-height: 160px;
-  width: 100% !important;
-  box-sizing: border-box !important;
-  
-}
-
-/* Half-height cards for Macbook and Airpods */
-.category-card-half {
-  min-height: 160px;
-  height: 100%; /* Let flexbox handle the height distribution */
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-.category-card.full-width {
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box;
-  margin: 0 auto !important;
 }
 
 .category-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 12px 24px rgba(0,0,0,0.2);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.category-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.1), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.category-card:hover::before {
+  opacity: 1;
+}
+
+.category-card-featured,
+.category-card-medium,
+.category-card-small,
+.category-card-tablet,
+.category-card-mobile {
+  height: 100%;
 }
 
 .category-content {
   height: 100%;
-  width: 100%;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 20px !important;
+  justify-content: space-between;
   position: relative;
-  text-align: center;
-  box-sizing: border-box;
-}
-
-.category-title {
-  font-weight: bold !important;
-  font-size: 1.8rem !important;
-  margin-bottom: 20px !important;
   z-index: 2;
 }
 
-.category-card-half .category-title {
-  font-size: 1.5rem !important;
-  margin-bottom: 10px !important;
+.category-text {
+  margin-bottom: 15px;
+}
+
+.category-title {
+  color: white !important;
+  font-weight: 700 !important;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  margin-bottom: 8px !important;
+  line-height: 1.2 !important;
+}
+
+.category-subtitle {
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  font-size: 1rem !important;
+  line-height: 1.4 !important;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .category-image-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: auto;
-  overflow: hidden;
   position: relative;
-  width: 100%;
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.category-image-container.featured {
+  height: 75%;
 }
 
 .category-image-container.small {
-  height: 80px;
-  max-width: 100%;
-}
-
-.category-card-large .category-image-container {
-  height: 200px;
-}
-
-.category-card-half .category-image-container {
-  height: 60px;
+  height: 60%;
 }
 
 .category-image {
@@ -205,91 +221,123 @@
 }
 
 /* Responsive adjustments */
-@media (max-width: 959px) {
-  .product-card, .category-card {
-    margin-bottom: 20px;
-    width: 100% !important;
+@media (max-width: 960px) {
+  .featured-item,
+  .secondary-items {
+    width: 100%;
+    height: auto;
+  }
+  
+  .medium-item {
+    height: 220px;
+    margin-bottom: 24px;
+  }
+  
+  .small-items-container {
+    height: 220px;
+  }
+  
+  .category-title {
+    font-size: 1.8rem !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .category-card-mobile {
+    height: 220px;
+  }
+  
+  .category-content {
+    padding: 16px;
   }
   
   .category-title {
     font-size: 1.5rem !important;
   }
-  
-  .category-card-large .category-image-container {
-    height: 150px;
-  }
-  
-  .category-card-small {
-    min-height: 130px;
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-  
-  .category-card-half {
-    min-height: 130px;
-    height: 100%;
-  }
-  
-  .MuiGrid-container[direction="column"] {
-    gap: 0 !important; 
-    width: 100% !important;
-  }
-
-  .MuiGrid-container[direction="column"] .MuiGrid-item:first-of-type {
-    margin-bottom: 8px !important; /* Adjust gap for smaller screens */
-  }
-
-  .MuiGrid-container[direction="column"] .MuiGrid-item:last-of-type {
-    margin-top: 8px !important; /* Adjust gap for smaller screens */
-  }
 }
 
-@media (max-width: 599px) {
-  .category-card-large {
-    min-height: 250px;
-    width: 100% !important;
-  }
-  
-  .category-card-small {
-    min-height: 120px;
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-  
-  .category-card-half {
-    min-height: 120px;
-    height: 100%;
-  }
-  
-  .category-card-large .category-image-container {
-    height: 120px;
-  }
-  
-  .category-image-container.small {
-    height: 60px;
-    max-width: 100%;
-  }
-  
-  .category-title {
-    font-size: 1.3rem !important;
-    margin-bottom: 10px !important;
-  }
-  
-  .category-card-half .category-title {
-    font-size: 1.2rem !important;
-    margin-bottom: 5px !important;
-  }
-  
-  .MuiGrid-container[direction="column"] {
-    gap: 0 !important;
-    width: 100% !important;
-  }
+/* Grid Layout */
+.grid-container {
+  display: flex;
+  flex-wrap: wrap;
+  margin: -12px;
+  width: 100%;
+  justify-content: center;
+}
 
-  .MuiGrid-container[direction="column"] .MuiGrid-item:first-of-type {
-    margin-bottom: 6px !important; /* Adjust gap for smallest screens */
-  }
+.grid-item {
+  padding: 12px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+}
 
-  .MuiGrid-container[direction="column"] .MuiGrid-item:last-of-type {
-    margin-top: 6px !important; /* Adjust gap for smallest screens */
-  }
+.mobile-item {
+  width: 100%;
+  height: 220px;
+}
+
+.tablet-item {
+  width: 50%;
+  height: 300px;
+}
+
+/* Featured Desktop Layout */
+.layout-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.featured-layout {
+  display: flex;
+  flex-wrap: wrap;
+  margin: -12px;
+  width: 100%;
+  max-width: 1200px;
+  justify-content: center;
+}
+
+.featured-item {
+  width: 50%;
+  padding: 12px;
+  box-sizing: border-box;
+  height: 450px;
+  display: flex;
+  justify-content: center;
+}
+
+.secondary-items {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  box-sizing: border-box;
+  height: 450px;
+  align-items: center;
+}
+
+.medium-item {
+  width: 100%;
+  height: 50%;
+  padding-bottom: 12px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+}
+
+.small-items-container {
+  display: flex;
+  margin: -6px;
+  height: 50%;
+  width: 100%;
+  justify-content: center;
+}
+
+.small-item {
+  width: 50%;
+  padding: 6px;
+  height: 100%;
+  display: flex;
+  justify-content: center;
 } 
