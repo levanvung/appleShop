@@ -42,7 +42,7 @@ const Home = () => {
   const bannerItems: BannerItem[] = [
     {
       id: 1,
-      image: 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-card-40-iphone15prohero-202309?wid=680&hei=528&fmt=p-jpg&qlt=95&.v=1693086290312',
+      image: 'https://i0.wp.com/blog.ugreen.com/wp-content/uploads/2020/10/iphone-12-banner-1.png?fit=1140%2C680&ssl=1',
       title: 'iPhone 15 Pro',
       description: 'Trải nghiệm điện thoại cao cấp với công nghệ đỉnh cao',
       buttonText: 'Mua ngay',
@@ -50,7 +50,7 @@ const Home = () => {
     },
     {
       id: 2,
-      image: 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/ipad-card-40-pro-202210?wid=680&hei=528&fmt=p-jpg&qlt=95&.v=1664578794100',
+      image: 'https://tiendung.vn/images/product/iphone-16/2024-Banner-apple-iphone-16-pro.jpg?1725963330231',
       title: 'iPad Pro',
       description: 'Mạnh mẽ và linh hoạt, iPad Pro mới với chip M2',
       buttonText: 'Khám phá',
@@ -58,7 +58,7 @@ const Home = () => {
     },
     {
       id: 3,
-      image: 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/macbook-air-og-202306?wid=1200&hei=630&fmt=jpeg&qlt=95&.v=1683845836458',
+      image: 'https://applescoop.org/image/story/iphone-18-rumors-variable-aperture-lenses-for-pro-models-applescoop-2024-11-09-13-23-19.jpg',
       title: 'MacBook Air',
       description: 'Mỏng nhẹ và mạnh mẽ với thời lượng pin cả ngày',
       buttonText: 'Tìm hiểu thêm',
