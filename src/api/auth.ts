@@ -20,6 +20,7 @@ interface AuthResponse {
             _id: string;
             name: string;
             email: string;
+            roles?: string[];
         };
         tokens: {
             accessToken: string;
@@ -32,7 +33,7 @@ export const authService = {
     signup: async (data: SignupData): Promise<AuthResponse> => {
         try {
             console.log('Sending signup request with data:', data);
-            const response = await apiClient.post('/signup', data, {
+            const response = await apiClient.post('/shop/signup', data, {
                 headers: {
                     'Content-Type': 'application/json',
                 }
@@ -56,7 +57,7 @@ export const authService = {
     login: async (data: LoginData): Promise<AuthResponse> => {
         try {
             console.log('Sending login request with data:', data);
-            const response = await apiClient.post('/login', data, {
+            const response = await apiClient.post('/shop/login', data, {
                 headers: {
                     'Content-Type': 'application/json',
                 }
@@ -77,8 +78,31 @@ export const authService = {
         }
     },
 
-    logout: () => {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
+    logout: async () => {
+        try {
+            const userId = localStorage.getItem('userId') || JSON.parse(localStorage.getItem('userInfo') || '{}')._id;
+            const accessToken = localStorage.getItem('accessToken');
+            
+            // Configure headers
+            const headers: Record<string, string> = {};
+            if (userId) {
+                headers['x-client-id'] = userId;
+            }
+            if (accessToken) {
+                headers['authorization'] = accessToken;
+            }
+            
+            // Call logout API
+            await apiClient.post('/shop/logout', {}, { headers });
+            
+            // Clear local storage after successful logout
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+        } catch (error) {
+            console.error('Logout error:', error);
+            // Even if the API call fails, clear the tokens from localStorage
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+        }
     }
 }; 

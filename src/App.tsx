@@ -5,9 +5,12 @@ import Layout from './components/Layout/Layout';
 import Home from './views/Home/Home';
 import SignIn from './views/Auth/SignIn';
 import SignUp from './views/Auth/SignUp';
-import Products from './views/Products/Products';
+import Categories from './views/Products/Categories';
+import ProductList from './views/Products/ProductList';
 import ProductDetail from './views/ProductDetail/ProductDetail';
 import About from './views/About/About';
+import ProductManagement from './views/Admin/Products/ProductManagement';
+import AdminRoute from './components/ProtectedRoute/AdminRoute';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 import './App.css';
@@ -51,9 +54,16 @@ function App() {
                   <Route path="/" element={<Home />} />
                   <Route path="/signin" element={<SignIn />} />
                   <Route path="/signup" element={<SignUp />} />
-                  <Route path="/categories" element={<Products />} />
+                  <Route path="/categories" element={<Categories />} />
+                  <Route path="/products" element={<Categories />} />
+                  <Route path="/products/:category" element={<ProductList />} />
                   <Route path="/product/:id" element={<ProductDetail />} />
                   <Route path="/about" element={<About />} />
+                  <Route path="/admin/products" element={
+                    <AdminRoute>
+                      <ProductManagement />
+                    </AdminRoute>
+                  } />
                   {/* Other routes will be added later */}
                 </Routes>
               </Layout>

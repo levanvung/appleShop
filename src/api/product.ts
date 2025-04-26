@@ -39,22 +39,8 @@ export interface ProductsResponse {
 export const productService = {
   getPublishedProducts: async (): Promise<ProductsResponse> => {
     try {
-      // Get user ID and access token from localStorage
-      const userId = localStorage.getItem('userId') || JSON.parse(localStorage.getItem('userInfo') || '{}')._id;
-      const accessToken = localStorage.getItem('accessToken');
-      
-      // Configure headers
-      const headers: Record<string, string> = {};
-      if (userId) {
-        headers['x-client-id'] = userId;
-      }
-      if (accessToken) {
-        // Send only the token without 'Bearer ' prefix
-        headers['authorization'] = accessToken;
-      }
-      
-      console.log('API Headers:', headers); // For debugging
-      const response = await apiClient.get('/product/published', { headers });
+      console.log('Fetching published products'); // For debugging
+      const response = await apiClient.get('/product/published');
       return response.data;
     } catch (error) {
       console.error('Error fetching published products:', error);
@@ -64,25 +50,22 @@ export const productService = {
 
   getProductById: async (productId: string): Promise<ProductsResponse> => {
     try {
-      // Get user ID and access token from localStorage
-      const userId = localStorage.getItem('userId') || JSON.parse(localStorage.getItem('userInfo') || '{}')._id;
-      const accessToken = localStorage.getItem('accessToken');
-      
-      // Configure headers
-      const headers: Record<string, string> = {};
-      if (userId) {
-        headers['x-client-id'] = userId;
-      }
-      if (accessToken) {
-        // Send only the token without 'Bearer ' prefix
-        headers['authorization'] = accessToken;
-      }
-      
-      console.log(`API Headers for product ${productId}:`, headers); // For debugging
-      const response = await apiClient.get(`/product/findOne/${productId}`, { headers });
+      console.log(`Fetching product with ID ${productId}`); // For debugging
+      const response = await apiClient.get(`/product/findOne/${productId}`);
       return response.data;
     } catch (error) {
       console.error(`Error fetching product with ID ${productId}:`, error);
+      throw error;
+    }
+  },
+  
+  searchProductsByCategory: async (category: string): Promise<ProductsResponse> => {
+    try {
+      console.log(`Searching products for category ${category}`); // For debugging
+      const response = await apiClient.get(`/product/search/${category}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error searching products for category ${category}:`, error);
       throw error;
     }
   }

@@ -6,6 +6,7 @@ interface UserInfo {
   _id: string;
   name: string;
   email: string;
+  roles?: string[];
 }
 
 interface AuthResponse {
@@ -90,12 +91,30 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   // Logout function
-  const logout = () => {
-    authService.logout();
-    setIsAuthenticated(false);
-    setUser(null);
-    localStorage.removeItem('userInfo');
-    localStorage.removeItem('userId');
+  const logout = async () => {
+    try {
+      await authService.logout();
+      setIsAuthenticated(false);
+      setUser(null);
+      
+      // Clear localStorage items
+      localStorage.removeItem('userInfo');
+      localStorage.removeItem('userId');
+      
+      // Redirect to login page
+      window.location.href = '/signin';
+    } catch (error) {
+      console.error('Logout error in context:', error);
+      
+      // Even if there's an error, clear the state and localStorage
+      setIsAuthenticated(false);
+      setUser(null);
+      localStorage.removeItem('userInfo');
+      localStorage.removeItem('userId');
+      
+      // Still redirect to login page
+      window.location.href = '/signin';
+    }
   };
 
   return (

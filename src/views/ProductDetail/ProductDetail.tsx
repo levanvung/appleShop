@@ -51,6 +51,8 @@ const ProductDetail = () => {
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [quantity, setQuantity] = useState(1);
   const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('Sản phẩm đã được thêm vào giỏ hàng!');
+  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error' | 'info' | 'warning'>('success');
   
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -123,11 +125,11 @@ const ProductDetail = () => {
     setSelectedSize(size);
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!product) return;
     
-    // Create the cart item and ignore TypeScript incompatibility for now
-    const cartItem = { 
+    // Create the cart item
+    const cartItem: CartItem = { 
       id: product._id, 
       name: product.product_name,
       fullName: product.product_name,
@@ -137,16 +139,64 @@ const ProductDetail = () => {
       colorName: colorMap[selectedColor || product.product_colors?.[0] || ''] || 'Default',
       size: selectedSize || product.product_sizes?.[0] || '',
       quantity: quantity,
-    } as any; // Use type assertion to bypass type checking
+    };
     
-    addToCart(cartItem);
-    setOpenSnackbar(true);
+    try {
+      const result = await addToCart(cartItem);
+      
+      if (result.success) {
+        setSnackbarMessage('Sản phẩm đã được thêm vào giỏ hàng!');
+        setSnackbarSeverity('success');
+      } else {
+        setSnackbarMessage(result.message || 'Không thể thêm sản phẩm vào giỏ hàng');
+        setSnackbarSeverity('error');
+      }
+      
+      setOpenSnackbar(true);
+    } catch (error) {
+      console.error("Failed to add to cart:", error);
+      setSnackbarMessage('Lỗi kết nối, vui lòng thử lại sau.');
+      setSnackbarSeverity('error');
+      setOpenSnackbar(true);
+    }
   };
 
-  const handleBuyNow = () => {
+  const handleBuyNow = async () => {
     if (!product) return;
-    handleAddToCart();
-    console.log('Redirecting to checkout...');
+    
+    // Create the cart item
+    const cartItem: CartItem = { 
+      id: product._id, 
+      name: product.product_name,
+      fullName: product.product_name,
+      price: product.product_price.toString(),
+      image: product.product_images?.[selectedImageIndex] || product.product_thumb,
+      color: selectedColor || product.product_colors?.[0] || '', 
+      colorName: colorMap[selectedColor || product.product_colors?.[0] || ''] || 'Default',
+      size: selectedSize || product.product_sizes?.[0] || '',
+      quantity: quantity,
+    };
+    
+    try {
+      const result = await addToCart(cartItem);
+      
+      if (result.success) {
+        // Proceed to checkout
+        console.log('Redirecting to checkout...');
+        // Logic to navigate to checkout page
+        // navigate('/checkout');
+      } else {
+        // Show error
+        setSnackbarMessage(result.message || 'Không thể thêm sản phẩm vào giỏ hàng');
+        setSnackbarSeverity('error');
+        setOpenSnackbar(true);
+      }
+    } catch (error) {
+      console.error("Failed to process buy now:", error);
+      setSnackbarMessage('Lỗi kết nối, vui lòng thử lại sau.');
+      setSnackbarSeverity('error');
+      setOpenSnackbar(true);
+    }
   };
 
   const handleCloseSnackbar = (event?: React.SyntheticEvent | Event, reason?: string) => {
@@ -263,7 +313,7 @@ const ProductDetail = () => {
           </Typography>
           
           <Typography variant="body1" sx={{ mb: 3 }}>
-            {product.product_description}
+            {product.product_description || 'Không có mô tả'}
           </Typography>
           
           <Divider sx={{ my: 3 }} />
@@ -380,11 +430,11 @@ const ProductDetail = () => {
       >
         <Alert 
           onClose={handleCloseSnackbar} 
-          severity="success" 
+          severity={snackbarSeverity} 
           variant="filled"
           sx={{ width: '100%' }}
         >
-          Product added to cart!
+          {snackbarMessage}
         </Alert>
       </Snackbar>
     </Container>

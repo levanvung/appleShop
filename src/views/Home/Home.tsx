@@ -34,7 +34,15 @@ const Home = () => {
       try {
         setLoading(true);
         const response = await productService.getPublishedProducts();
-        setProducts(response.metadata);
+        // Kiểm tra và chuyển đổi metadata thành mảng
+        if (response.metadata) {
+          const productsData = Array.isArray(response.metadata) 
+            ? response.metadata 
+            : [response.metadata];
+          setProducts(productsData);
+        } else {
+          setProducts([]);
+        }
         setLoading(false);
       } catch (err) {
         console.error('Failed to fetch products:', err);
@@ -125,6 +133,7 @@ const Home = () => {
               {products.map((product) => (
                 <Grid 
                   item
+                  component="div"
                   key={product._id} 
                   xs={12} 
                   sm={6} 
@@ -149,9 +158,9 @@ const Home = () => {
                         {product.product_name}
                       </Typography>
                       <Typography variant="body2" color="text.secondary" sx={{ mt: 1, minHeight: '40px' }}>
-                        {product.product_description.length > 60 
+                        {product.product_description && product.product_description.length > 60 
                           ? `${product.product_description.substring(0, 60)}...` 
-                          : product.product_description}
+                          : product.product_description || 'Không có mô tả'}
                       </Typography>
                       <Typography variant="body1" color="text.primary" sx={{ fontWeight: 'bold', mt: 1 }}>
                         {formatPrice(product.product_price)}

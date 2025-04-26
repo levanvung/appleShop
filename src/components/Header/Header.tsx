@@ -74,9 +74,14 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 // Menu items (can be extracted to a separate file)
 const menuItems = [
   { text: 'Trang chủ', path: '/' },
-  { text: 'Danh mục', path: '/categories' },
+  { text: 'Danh mục', path: '/products' },
   { text: 'Sản phẩm nổi bật', path: '/featured' },
   { text: 'Về chúng tôi', path: '/about' }
+];
+
+// Menu items chỉ dành cho ADMIN
+const adminMenuItems = [
+  { text: 'Quản lý sản phẩm', path: '/admin/products' }
 ];
 
 const Header = () => {
@@ -91,6 +96,9 @@ const Header = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { cartCount, toggleCart } = useCart();
   const { isAuthenticated, user, logout } = useAuth();
+  
+  // Kiểm tra người dùng có phải là ADMIN hay không
+  const isAdmin = user?.roles?.includes('ADMIN');
   
   // Handle drawer toggle
   const toggleDrawer = (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
@@ -113,17 +121,31 @@ const Header = () => {
     setUserMenuAnchor(null);
   };
   
-  const handleLogout = () => {
-    logout();
-    handleUserMenuClose();
-    
-    // Clear any existing location state
-    window.history.replaceState({}, document.title);
-    
-    setNotification({
-      show: true,
-      message: 'Đăng xuất thành công'
-    });
+  const handleLogout = async () => {
+    try {
+      // Close the user menu
+      handleUserMenuClose();
+      
+      // Clear any existing location state
+      window.history.replaceState({}, document.title);
+      
+      // Show notification
+      setNotification({
+        show: true,
+        message: 'Đang đăng xuất...'
+      });
+      
+      // Call logout function (which will redirect to login page)
+      await logout();
+    } catch (error) {
+      console.error('Error during logout:', error);
+      
+      // Show error notification
+      setNotification({
+        show: true,
+        message: 'Đã xảy ra lỗi khi đăng xuất'
+      });
+    }
   };
   
   const handleCloseNotification = () => {
@@ -170,6 +192,26 @@ const Header = () => {
             </ListItemButton>
           </ListItem>
         ))}
+        
+        {/* Admin menu items */}
+        {isAdmin && (
+          <>
+            <Divider sx={{ backgroundColor: 'rgba(255,255,255,0.1)', my: 1 }} />
+            {adminMenuItems.map((item) => (
+              <ListItem key={item.text} disablePadding>
+                <ListItemButton 
+                  component={Link} 
+                  to={item.path}
+                  onClick={toggleDrawer(false)}
+                  sx={{ py: 2, color: '#f50057' }}
+                >
+                  <ListItemText primary={item.text} />
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </>
+        )}
+        
         <Divider sx={{ backgroundColor: 'rgba(255,255,255,0.1)', my: 1 }} />
         
         {isAuthenticated ? (
@@ -295,6 +337,23 @@ const Header = () => {
                   component={Link} 
                   to={item.path} 
                   sx={{ color: 'white', textDecoration: 'none', marginRight: '20px' }}
+                >
+                  {item.text}
+                </Typography>
+              ))}
+              
+              {/* Admin menu items */}
+              {isAdmin && adminMenuItems.map((item) => (
+                <Typography 
+                  key={item.text}
+                  component={Link} 
+                  to={item.path} 
+                  sx={{ 
+                    color: '#f50057', 
+                    textDecoration: 'none', 
+                    marginRight: '20px',
+                    fontWeight: 'bold'
+                  }}
                 >
                   {item.text}
                 </Typography>

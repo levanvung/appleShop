@@ -1,145 +1,133 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { 
   Container, Typography, Grid, Card, CardMedia, CardContent, 
-  Button, Box, FormControl, InputLabel, Select, MenuItem, TextField,
-  Pagination, Chip, Rating, SelectChangeEvent
+  Button, Box, Pagination, Chip, CircularProgress, Alert
 } from '@mui/material';
 import './Products.css';
+import { productService, Product } from '../../api/product';
 
-// Mock product data
-const products = [
-  {
-    id: 1,
-    name: 'iPhone 15 Pro',
-    price: '29.990.000 ₫',
-    image: 'https://placehold.co/300x200/333/fff?text=iPhone+15+Pro',
-    category: 'Điện thoại',
-    rating: 4.8,
-    inStock: true
-  },
-  {
-    id: 2,
-    name: 'MacBook Pro M3',
-    price: '49.990.000 ₫',
-    image: 'https://placehold.co/300x200/333/fff?text=MacBook+Pro+M3',
-    category: 'Laptop',
-    rating: 4.9,
-    inStock: true
-  },
-  {
-    id: 3,
-    name: 'iPad Pro',
-    price: '24.990.000 ₫',
-    image: 'https://placehold.co/300x200/333/fff?text=iPad+Pro',
-    category: 'Máy tính bảng',
-    rating: 4.7,
-    inStock: true
-  },
-  {
-    id: 4,
-    name: 'AirPods Pro',
-    price: '6.990.000 ₫',
-    image: 'https://placehold.co/300x200/333/fff?text=AirPods+Pro',
-    category: 'Tai nghe',
-    rating: 4.6,
-    inStock: true
-  },
-  {
-    id: 5,
-    name: 'Apple Watch Series 9',
-    price: '12.990.000 ₫',
-    image: 'https://placehold.co/300x200/333/fff?text=Apple+Watch+S9',
-    category: 'Smart Watch',
-    rating: 4.5,
-    inStock: true
-  },
-  {
-    id: 6,
-    name: 'iMac M3',
-    price: '39.990.000 ₫',
-    image: 'https://placehold.co/300x200/333/fff?text=iMac+M3',
-    category: 'Máy tính để bàn',
-    rating: 4.7,
-    inStock: false
-  },
-  {
-    id: 7,
-    name: 'Mac Mini M2',
-    price: '15.990.000 ₫',
-    image: 'https://placehold.co/300x200/333/fff?text=Mac+Mini+M2',
-    category: 'Máy tính để bàn',
-    rating: 4.6,
-    inStock: true
-  },
-  {
-    id: 8,
-    name: 'AirPods Max',
-    price: '13.990.000 ₫',
-    image: 'https://placehold.co/300x200/333/fff?text=AirPods+Max',
-    category: 'Tai nghe',
-    rating: 4.4,
-    inStock: true
-  },
-  {
-    id: 9,
-    name: 'iPhone 16 Promax',
-    price: '24.090.000₫',
-    image: 'https://placehold.co/300x200/333/fff?text=iPhone+16+Promax',
-    category: 'Điện thoại',
-    rating: 4.9,
-    inStock: true
-  }
-];
-
+// Fixed categories with images
 const categories = [
-  'Tất cả',
-  'Điện thoại',
-  'Laptop',
-  'Máy tính bảng',
-  'Tai nghe',
-  'Smart Watch',
-  'Máy tính để bàn'
+  { 
+    name: "IPHONE", 
+    image: "https://placehold.co/300x300/ffffff/333333?text=iPhone&font=playfair", 
+    displayName: "Iphone",
+    imgElement: (
+      <div className="category-image-container">
+        <img 
+          src="/images/iphone.png" 
+          alt="iPhone" 
+          onError={(e) => {
+            e.currentTarget.src = "https://placehold.co/300x300/ffffff/333333?text=iPhone&font=playfair";
+          }}
+          className="category-image" 
+        />
+      </div>
+    )
+  },
+  { 
+    name: "IPAD", 
+    image: "https://placehold.co/300x300/ffffff/333333?text=iPad&font=playfair", 
+    displayName: "Ipad",
+    imgElement: (
+      <div className="category-image-container">
+        <img 
+          src="/images/ipad.png" 
+          alt="iPad" 
+          onError={(e) => {
+            e.currentTarget.src = "https://placehold.co/300x300/ffffff/333333?text=iPad&font=playfair";
+          }}
+          className="category-image" 
+        />
+      </div>
+    )
+  },
+  { 
+    name: "MACBOOK", 
+    image: "https://placehold.co/300x300/ffffff/333333?text=Macbook&font=playfair", 
+    displayName: "Macbook",
+    imgElement: (
+      <div className="category-image-container">
+        <img 
+          src="/images/macbook.png" 
+          alt="Macbook" 
+          onError={(e) => {
+            e.currentTarget.src = "https://placehold.co/300x300/ffffff/333333?text=Macbook&font=playfair";
+          }}
+          className="category-image" 
+        />
+      </div>
+    )
+  },
+  { 
+    name: "AIRPODS", 
+    image: "https://placehold.co/300x300/ffffff/333333?text=Airpods&font=playfair", 
+    displayName: "Airpods",
+    imgElement: (
+      <div className="category-image-container">
+        <img 
+          src="/images/airpods.png" 
+          alt="Airpods" 
+          onError={(e) => {
+            e.currentTarget.src = "https://placehold.co/300x300/ffffff/333333?text=Airpods&font=playfair";
+          }}
+          className="category-image" 
+        />
+      </div>
+    )
+  }
 ];
 
 const Products = () => {
   const navigate = useNavigate();
-  const [category, setCategory] = useState('Tất cả');
-  const [sortBy, setSortBy] = useState('default');
+  const { category } = useParams<{ category?: string }>();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  
+  // Determine the selected category
+  const selectedCategory = category ? 
+    categories.find(c => c.name.toLowerCase() === category.toLowerCase()) || null 
+    : null;
 
-  // Filter products by category
-  const filteredProducts = category === 'Tất cả' 
-    ? products 
-    : products.filter(product => product.category === category);
-
-  // Sort products
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-    if (sortBy === 'price-asc') {
-      return parseInt(a.price.replace(/\D/g, '')) - parseInt(b.price.replace(/\D/g, ''));
-    } else if (sortBy === 'price-desc') {
-      return parseInt(b.price.replace(/\D/g, '')) - parseInt(a.price.replace(/\D/g, ''));
-    } else if (sortBy === 'rating') {
-      return b.rating - a.rating;
+  // Load products when component mounts or category changes
+  useEffect(() => {
+    if (selectedCategory) {
+      fetchProductsByCategory(selectedCategory.name);
     }
-    return 0;
-  });
+  }, [selectedCategory]);
+
+  const fetchProductsByCategory = async (category: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await productService.searchProductsByCategory(category);
+      if (Array.isArray(response.metadata)) {
+        setProducts(response.metadata);
+      } else {
+        setProducts([]);
+      }
+      setLoading(false);
+    } catch (err) {
+      console.error(`Error fetching products for category ${category}:`, err);
+      setError('Không thể tải sản phẩm. Vui lòng thử lại sau.');
+      setLoading(false);
+    }
+  };
 
   // Pagination
   const productsPerPage = 8;
-  const pageCount = Math.ceil(sortedProducts.length / productsPerPage);
-  const displayedProducts = sortedProducts.slice(
+  const pageCount = Math.ceil(products.length / productsPerPage);
+  const displayedProducts = products.slice(
     (page - 1) * productsPerPage, 
     page * productsPerPage
   );
 
-  const handleCategoryChange = (event: SelectChangeEvent<string>) => {
-    setCategory(event.target.value);
+  const handleCategoryClick = (category: string) => {
+    navigate(`/products/${category.toLowerCase()}`);
     setPage(1);
-  };
-
-  const handleSortChange = (event: SelectChangeEvent<string>) => {
-    setSortBy(event.target.value);
   };
 
   const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
@@ -147,105 +135,47 @@ const Products = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   
-  const handleProductClick = (productId: number) => {
+  const handleProductClick = (productId: string) => {
     navigate(`/product/${productId}`);
+  };
+
+  // Format price with Vietnamese currency
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
   };
 
   return (
     <div className="products">
       <Container maxWidth="xl" sx={{ py: 4, px: { xs: 2, md: 4 } }}>
         <Typography variant="h4" component="h1" gutterBottom sx={{ mb: 4, textAlign: 'center' }}>
-          Sản phẩm
+          Danh mục sản phẩm
         </Typography>
         
-        {/* Filters */}
+        {/* Category Cards */}
         <Box sx={{ maxWidth: 1400, mx: 'auto', mb: 5 }}>
-          <Grid container spacing={3}>
-            <Grid item xs={12} sm={6} md={3}>
-              <FormControl fullWidth>
-                <InputLabel>Danh mục</InputLabel>
-                <Select value={category} onChange={handleCategoryChange} label="Danh mục">
-                  {categories.map((cat) => (
-                    <MenuItem key={cat} value={cat}>{cat}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            
-            <Grid item xs={12} sm={6} md={3}>
-              <FormControl fullWidth>
-                <InputLabel>Sắp xếp theo</InputLabel>
-                <Select value={sortBy} onChange={handleSortChange} label="Sắp xếp theo">
-                  <MenuItem value="default">Mặc định</MenuItem>
-                  <MenuItem value="price-asc">Giá: Thấp đến cao</MenuItem>
-                  <MenuItem value="price-desc">Giá: Cao đến thấp</MenuItem>
-                  <MenuItem value="rating">Đánh giá cao nhất</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            
-            <Grid item xs={12} sm={12} md={6}>
-              <TextField
-                fullWidth
-                label="Tìm kiếm sản phẩm"
-                variant="outlined"
-                placeholder="Nhập tên sản phẩm..."
-              />
-            </Grid>
-          </Grid>
-        </Box>
-        
-        {/* Products */}
-        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-          <Grid container spacing={3} justifyContent="center" sx={{ maxWidth: 1400, mx: 'auto' }}>
-            {displayedProducts.map((product) => (
-              <Grid item key={product.id} xs={12} sm={6} md={4} lg={3}>
+          <Grid container spacing={3} justifyContent="center">
+            {categories.map((cat) => (
+              <Grid item xs={12} sm={6} md={3} key={cat.name}>
                 <Card 
-                  className="product-card"
-                  onClick={() => handleProductClick(product.id)}
+                  className={`category-card ${selectedCategory === cat ? 'selected' : ''}`}
+                  onClick={() => handleCategoryClick(cat.name)}
+                  sx={{ 
+                    cursor: 'pointer', 
+                    textAlign: 'center',
+                    transition: 'all 0.3s ease',
+                    transform: selectedCategory === cat ? 'scale(1.05)' : 'scale(1)',
+                    boxShadow: selectedCategory === cat ? '0 8px 16px rgba(0,0,0,0.2)' : '0 2px 4px rgba(0,0,0,0.1)',
+                    '&:hover': {
+                      transform: 'scale(1.05)',
+                      boxShadow: '0 8px 16px rgba(0,0,0,0.2)'
+                    }
+                  }}
                 >
-                  <CardMedia
-                    component="img"
-                    image={product.image}
-                    alt={product.name}
-                    height="200"
-                  />
-                  <CardContent>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      {product.category}
+                  <CardContent sx={{ py: 4 }}>
+                    <Typography variant="h5" component="h3" fontWeight="bold">
+                      {cat.displayName}
                     </Typography>
-                    <Typography variant="h6" component="h3">
-                      {product.name}
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mt: 1, mb: 1 }}>
-                      <Rating value={product.rating} precision={0.1} readOnly size="small" />
-                      <Typography variant="body2" sx={{ ml: 1 }}>
-                        {product.rating}
-                      </Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
-                      <Typography variant="body1" color="text.primary" sx={{ fontWeight: 'bold' }}>
-                        {product.price}
-                      </Typography>
-                      <Chip 
-                        label={product.inStock ? "Còn hàng" : "Hết hàng"} 
-                        color={product.inStock ? "success" : "error"} 
-                        size="small" 
-                      />
-                    </Box>
-                    <Button 
-                      variant="contained" 
-                      color="primary" 
-                      fullWidth 
-                      sx={{ mt: 2 }}
-                      disabled={!product.inStock}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleProductClick(product.id);
-                      }}
-                    >
-                      Mua ngay
-                    </Button>
+                    {cat.imgElement}
                   </CardContent>
                 </Card>
               </Grid>
@@ -253,18 +183,100 @@ const Products = () => {
           </Grid>
         </Box>
         
-        {/* Pagination */}
-        {pageCount > 1 && (
-          <Box sx={{ mt: 6, display: 'flex', justifyContent: 'center' }}>
-            <Pagination 
-              count={pageCount} 
-              page={page} 
-              onChange={handlePageChange} 
-              color="primary" 
-              size="large"
-            />
-          </Box>
-        )}
+        {/* Product List Section */}
+        <Box sx={{ maxWidth: 1400, mx: 'auto', mt: 5 }}>
+          {selectedCategory ? (
+            <>
+              <Typography variant="h5" component="h2" gutterBottom sx={{ mb: 3 }}>
+                Sản phẩm {selectedCategory.displayName}
+              </Typography>
+              
+              {loading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', my: 5 }}>
+                  <CircularProgress />
+                </Box>
+              ) : error ? (
+                <Alert severity="error" sx={{ my: 3 }}>{error}</Alert>
+              ) : products.length === 0 ? (
+                <Alert severity="info" sx={{ my: 3 }}>Không có sản phẩm nào trong danh mục này.</Alert>
+              ) : (
+                <>
+                  {/* Products Grid */}
+                  <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Grid container spacing={3} justifyContent="center" sx={{ mx: 'auto' }}>
+                      {displayedProducts.map((product) => (
+                        <Grid item xs={12} sm={6} md={4} lg={3} key={product._id}>
+                          <Card 
+                            className="product-card"
+                            onClick={() => handleProductClick(product._id)}
+                            sx={{ cursor: 'pointer', height: '100%', display: 'flex', flexDirection: 'column' }}
+                          >
+                            <CardMedia
+                              component="img"
+                              image={product.product_thumb || `https://placehold.co/300x200/333/fff?text=${encodeURIComponent(product.product_name)}`}
+                              alt={product.product_name}
+                              sx={{ height: 200, objectFit: 'contain' }}
+                            />
+                            <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                              <Typography variant="body2" color="text.secondary" gutterBottom>
+                                {product.product_type}
+                              </Typography>
+                              <Typography variant="h6" component="h3" sx={{ flexGrow: 1 }}>
+                                {product.product_name}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary" sx={{ mt: 1, minHeight: '40px' }}>
+                                {product.product_description && product.product_description.length > 60 
+                                  ? `${product.product_description.substring(0, 60)}...` 
+                                  : product.product_description || 'Không có mô tả'}
+                              </Typography>
+                              <Typography variant="body1" color="text.primary" sx={{ fontWeight: 'bold', mt: 1 }}>
+                                {formatPrice(product.product_price)}
+                              </Typography>
+                              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
+                                <Chip 
+                                  label={product.product_quantity > 0 ? "Còn hàng" : "Hết hàng"} 
+                                  color={product.product_quantity > 0 ? "success" : "error"} 
+                                  size="small" 
+                                />
+                                <Button 
+                                  variant="contained" 
+                                  color="primary" 
+                                  size="small"
+                                  disabled={product.product_quantity <= 0}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleProductClick(product._id);
+                                  }}
+                                >
+                                  Mua ngay
+                                </Button>
+                              </Box>
+                            </CardContent>
+                          </Card>
+                        </Grid>
+                      ))}
+                    </Grid>
+                  </Box>
+                  
+                  {/* Pagination */}
+                  {pageCount > 1 && (
+                    <Box sx={{ mt: 6, display: 'flex', justifyContent: 'center' }}>
+                      <Pagination 
+                        count={pageCount} 
+                        page={page} 
+                        onChange={handlePageChange} 
+                        color="primary" 
+                        size="large"
+                      />
+                    </Box>
+                  )}
+                </>
+              )}
+            </>
+          ) : (
+            <Alert severity="info" sx={{ my: 5 }}>Vui lòng chọn một danh mục để xem sản phẩm</Alert>
+          )}
+        </Box>
       </Container>
     </div>
   );

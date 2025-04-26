@@ -1,45 +1,295 @@
+/* Products Page Styles */
 .products {
-  padding: 20px 0;
+  min-height: 100vh;
+  width: 100%;
+  background-color: #f8f9fa;
 }
 
-.product-card {
+/* Categories Page Styles */
+.categories-page {
+  min-height: 100vh;
+  width: 100%;
+  background-color: #000;
+  padding: 30px 0;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Grid layout fixes */
+.MuiGrid-container {
+  width: 100% !important;
+  margin: 0 auto !important;
+  justify-content: center !important;
+  display: flex !important;
+}
+
+.MuiGrid-item {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding: 12px !important;
+}
+
+/* Vertical stack container specific adjustments */
+.MuiGrid-container[direction="column"] {
+  height: 100% !important;
+  flex-direction: column !important;
+  padding: 0 !important; 
+  gap: 0 !important; /* Reset gap for the container */
+  width: 100% !important;
+  justify-content: space-between !important;
+  align-items: stretch !important;
+}
+
+.MuiGrid-container[direction="column"] .MuiGrid-item {
+  padding: 0 !important; /* Remove padding for direct children */
+  flex-grow: 1; /* Allow items to grow and take space */
+}
+
+.MuiGrid-container[direction="column"] .MuiGrid-item:first-of-type {
+  margin-bottom: 12px !important; /* Add gap equivalent below first item */
+}
+.categories-page .MuiGrid-container:not([direction]) > .MuiGrid-item {
+  /* spacing={3} ⇒ 3 * 8px = 24px khoảng trống giữa các cột,
+     tổng 2 khoảng ở 3 cột là 48px, vậy mỗi cột lấy (100% - 48px)/3 */
+  flex-basis: calc((100% - 48px) / 3) !important;
+  max-width:  calc((100% - 48px) / 3) !important;
+  flex-grow:  0 !important;  /* đảm bảo không giãn thêm */
+}
+
+.MuiGrid-container[direction="column"] .MuiGrid-item:last-of-type {
+  margin-top: 12px !important; /* Add gap equivalent above last item */
+}
+
+/* Wide column styles (col-3) */
+.MuiGrid-item[class*="MuiGrid-grid-md-6"] {
+  max-width: 100% !important;
+  flex-basis: 50% !important; /* Ensure it takes up 50% of width on medium screens */
+}
+
+/* Category Card Styles */
+.category-card {
   height: 100%;
+  border-radius: 15px !important;
+  background-color: #fff !important;
+  color: #000;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
   display: flex;
   flex-direction: column;
-  transition: transform 0.3s, box-shadow 0.3s;
-  background-color: rgba(255, 255, 255, 0.9);
-  cursor: pointer;
+  align-items: center;
+  width: 100%;
+  margin: 0 auto !important;
+  box-sizing: border-box !important;
+}
+
+.category-card-large {
+  min-height: 350px;
+  width: 100% !important;
+  flex-grow: 1;
+}
+
+.category-card-small {
+  min-height: 160px;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  
+}
+
+/* Half-height cards for Macbook and Airpods */
+.category-card-half {
+  min-height: 160px;
+  height: 100%; /* Let flexbox handle the height distribution */
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.category-card.full-width {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+  margin: 0 auto !important;
+}
+
+.category-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.2);
+}
+
+.category-content {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px !important;
+  position: relative;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.category-title {
+  font-weight: bold !important;
+  font-size: 1.8rem !important;
+  margin-bottom: 20px !important;
+  z-index: 2;
+}
+
+.category-card-half .category-title {
+  font-size: 1.5rem !important;
+  margin-bottom: 10px !important;
+}
+
+.category-image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: auto;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+
+.category-image-container.small {
+  height: 80px;
+  max-width: 100%;
+}
+
+.category-card-large .category-image-container {
+  height: 200px;
+}
+
+.category-card-half .category-image-container {
+  height: 60px;
+}
+
+.category-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+}
+
+.category-card:hover .category-image {
+  transform: scale(1.05);
+}
+
+/* Product Card Styles */
+.product-card {
+  transition: all 0.3s ease;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background-color: white;
+  margin: 0 auto !important;
 }
 
 .product-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
 }
 
-.MuiCardContent-root {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.MuiCardContent-root .MuiButton-root {
-  margin-top: auto;
-}
-
+/* Pagination Styles */
 .MuiPagination-root {
-  margin-top: 20px;
+  margin: 30px 0;
+  display: flex;
+  justify-content: center;
 }
 
-.MuiCardMedia-root {
-  transition: transform 0.3s ease;
+/* Responsive adjustments */
+@media (max-width: 959px) {
+  .product-card, .category-card {
+    margin-bottom: 20px;
+    width: 100% !important;
+  }
+  
+  .category-title {
+    font-size: 1.5rem !important;
+  }
+  
+  .category-card-large .category-image-container {
+    height: 150px;
+  }
+  
+  .category-card-small {
+    min-height: 130px;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  .category-card-half {
+    min-height: 130px;
+    height: 100%;
+  }
+  
+  .MuiGrid-container[direction="column"] {
+    gap: 0 !important; 
+    width: 100% !important;
+  }
+
+  .MuiGrid-container[direction="column"] .MuiGrid-item:first-of-type {
+    margin-bottom: 8px !important; /* Adjust gap for smaller screens */
+  }
+
+  .MuiGrid-container[direction="column"] .MuiGrid-item:last-of-type {
+    margin-top: 8px !important; /* Adjust gap for smaller screens */
+  }
 }
 
-.product-card:hover .MuiCardMedia-root {
-  transform: scale(1.05);
-}
+@media (max-width: 599px) {
+  .category-card-large {
+    min-height: 250px;
+    width: 100% !important;
+  }
+  
+  .category-card-small {
+    min-height: 120px;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  .category-card-half {
+    min-height: 120px;
+    height: 100%;
+  }
+  
+  .category-card-large .category-image-container {
+    height: 120px;
+  }
+  
+  .category-image-container.small {
+    height: 60px;
+    max-width: 100%;
+  }
+  
+  .category-title {
+    font-size: 1.3rem !important;
+    margin-bottom: 10px !important;
+  }
+  
+  .category-card-half .category-title {
+    font-size: 1.2rem !important;
+    margin-bottom: 5px !important;
+  }
+  
+  .MuiGrid-container[direction="column"] {
+    gap: 0 !important;
+    width: 100% !important;
+  }
 
-@media (max-width: 600px) {
-  .products .MuiGrid-item {
-    padding-bottom: 16px;
+  .MuiGrid-container[direction="column"] .MuiGrid-item:first-of-type {
+    margin-bottom: 6px !important; /* Adjust gap for smallest screens */
+  }
+
+  .MuiGrid-container[direction="column"] .MuiGrid-item:last-of-type {
+    margin-top: 6px !important; /* Adjust gap for smallest screens */
   }
 } 
