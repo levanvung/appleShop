@@ -81,7 +81,8 @@ const menuItems = [
 
 // Menu items chỉ dành cho ADMIN
 const adminMenuItems = [
-  { text: 'Quản lý sản phẩm', path: '/admin/products' }
+  { text: 'Thêm sản phẩm mới', path: '/admin/products' },
+  { text: 'Quản lý sản phẩm', path: '/admin/products-list' }
 ];
 
 const Header = () => {

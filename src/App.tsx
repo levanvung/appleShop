@@ -12,6 +12,7 @@ import ProductDetail from './views/ProductDetail/ProductDetail';
 import About from './views/About/About';
 import Checkout from './views/Checkout/Checkout';
 import ProductManagement from './views/Admin/Products/ProductManagement';
+import AdminProductList from './views/Admin/Products/ProductList';
 import AdminRoute from './components/ProtectedRoute/AdminRoute';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
@@ -97,6 +98,11 @@ function App() {
                   <Route path="/admin/products" element={
                     <AdminRoute>
                       <ProductManagement />
+                    </AdminRoute>
+                  } />
+                  <Route path="/admin/products-list" element={
+                    <AdminRoute>
+                      <AdminProductList />
                     </AdminRoute>
                   } />
                   {/* Other routes will be added later */}

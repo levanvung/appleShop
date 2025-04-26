@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { 
   Container, Typography, Card, CardMedia, CardContent, 
   Button, Box, Pagination, Chip, CircularProgress, Alert
@@ -7,6 +7,7 @@ import {
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import './Products.css';
 import { productService, Product } from '../../api/product';
+import { Link, useNavigate } from 'react-router-dom';
 
 // Fixed categories
 const categoryMap = {
@@ -83,11 +84,6 @@ const ProductList = () => {
     navigate(`/product/${productId}`);
   };
 
-  // Format price with Vietnamese currency
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
-  };
-
   return (
     <div className="products">
       <Container maxWidth="xl" sx={{ py: 6, px: { xs: 2, md: 4 } }}>
@@ -145,7 +141,9 @@ const ProductList = () => {
                                   {product.product_type}
                                 </Typography>
                                 <Typography variant="h6" component="h3" sx={{ fontWeight: 600, mb: 1 }}>
-                                  {product.product_name}
+                                  <Link to={`/product/${product._id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                    {product.product_name}
+                                  </Link>
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2, minHeight: '40px' }}>
                                   {product.product_description.length > 60 
@@ -154,35 +152,54 @@ const ProductList = () => {
                                 </Typography>
                               </Box>
                               <Box>
-                                <Typography variant="h6" color="primary.main" sx={{ fontWeight: 'bold', mb: 2 }}>
-                                  {formatPrice(product.product_price)}
-                                </Typography>
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 'auto' }}>
+                                  <Typography variant="h6" color="primary">
+                                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.product_price)}
+                                  </Typography>
                                   <Chip 
-                                    label={product.product_quantity > 0 ? "Còn hàng" : "Hết hàng"} 
-                                    color={product.product_quantity > 0 ? "success" : "error"} 
+                                    label={
+                                      product.stock_status !== undefined 
+                                        ? product.stock_status === 'in_stock' 
+                                          ? "Còn hàng" 
+                                          : "Hết hàng"
+                                        : product.product_quantity > 0 
+                                          ? "Còn hàng" 
+                                          : "Hết hàng"
+                                    } 
+                                    color={
+                                      product.stock_status !== undefined 
+                                        ? product.stock_status === 'in_stock' 
+                                          ? "success" 
+                                          : "error"
+                                        : product.product_quantity > 0 
+                                          ? "success" 
+                                          : "error"
+                                    } 
                                     size="small" 
-                                    sx={{ fontWeight: 500 }}
                                   />
-                                  <Button 
-                                    variant="contained" 
-                                    color="primary" 
-                                    size="small"
-                                    disabled={product.product_quantity <= 0}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleProductClick(product._id);
-                                    }}
-                                    startIcon={<ShoppingCartIcon />}
-                                    sx={{ 
-                                      borderRadius: '20px',
-                                      textTransform: 'none',
-                                      fontWeight: 600
-                                    }}
-                                  >
-                                    Mua ngay
-                                  </Button>
                                 </Box>
+                                <Button 
+                                  variant="contained" 
+                                  color="primary" 
+                                  size="small"
+                                  disabled={
+                                    product.stock_status !== undefined 
+                                      ? product.stock_status === 'out_of_stock'
+                                      : product.product_quantity <= 0
+                                  }
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleProductClick(product._id);
+                                  }}
+                                  startIcon={<ShoppingCartIcon />}
+                                  sx={{ 
+                                    borderRadius: '20px',
+                                    textTransform: 'none',
+                                    fontWeight: 600
+                                  }}
+                                >
+                                  Mua ngay
+                                </Button>
                               </Box>
                             </CardContent>
                           </Card>

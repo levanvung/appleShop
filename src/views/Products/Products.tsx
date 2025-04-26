@@ -234,15 +234,15 @@ const Products = () => {
                               </Typography>
                               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
                                 <Chip 
-                                  label={product.product_quantity > 0 ? "Còn hàng" : "Hết hàng"} 
-                                  color={product.product_quantity > 0 ? "success" : "error"} 
+                                  label={product.stock_status === 'in_stock' ? "Còn hàng" : "Hết hàng"} 
+                                  color={product.stock_status === 'in_stock' ? "success" : "error"} 
                                   size="small" 
                                 />
                                 <Button 
                                   variant="contained" 
                                   color="primary" 
                                   size="small"
-                                  disabled={product.product_quantity <= 0}
+                                  disabled={product.stock_status !== 'in_stock'}
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleProductClick(product._id);

@@ -104,5 +104,67 @@ export const productService = {
       console.error('Error fetching hot products:', error);
       throw error;
     }
+  },
+  
+  updateProduct: async (productId: string, productData: Partial<Product>): Promise<ProductsResponse> => {
+    try {
+      console.log(`Updating product with ID ${productId}`); // For debugging
+      
+      // Get authentication tokens
+      const userId = localStorage.getItem('userId') || JSON.parse(localStorage.getItem('userInfo') || '{}')._id;
+      const accessToken = localStorage.getItem('accessToken');
+      
+      // Configure headers
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+      
+      if (userId) {
+        headers['x-client-id'] = userId;
+      }
+      
+      if (accessToken) {
+        headers['authorization'] = accessToken;
+      }
+      
+      // Send API request
+      const response = await apiClient.patch(`/product/update/${productId}`, productData, { headers });
+      
+      return response.data;
+    } catch (error) {
+      console.error(`Error updating product with ID ${productId}:`, error);
+      throw error;
+    }
+  },
+  
+  unpublishProduct: async (productId: string): Promise<ProductsResponse> => {
+    try {
+      console.log(`Unpublishing product with ID ${productId}`); // For debugging
+      
+      // Get authentication tokens
+      const userId = localStorage.getItem('userId') || JSON.parse(localStorage.getItem('userInfo') || '{}')._id;
+      const accessToken = localStorage.getItem('accessToken');
+      
+      // Configure headers
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+      
+      if (userId) {
+        headers['x-client-id'] = userId;
+      }
+      
+      if (accessToken) {
+        headers['authorization'] = accessToken;
+      }
+      
+      // Send API request
+      const response = await apiClient.post(`/product/unpublished/${productId}`, {}, { headers });
+      
+      return response.data;
+    } catch (error) {
+      console.error(`Error unpublishing product with ID ${productId}:`, error);
+      throw error;
+    }
   }
 }; 

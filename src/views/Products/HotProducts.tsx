@@ -133,10 +133,9 @@ const HotProducts = () => {
                       {formatCurrency(product.product_price)} đ
                     </Typography>
                     <Chip 
-                      label={product.stock_status === 'in_stock' ? 'Còn hàng' : 'Hết hàng'} 
-                      color={product.stock_status === 'in_stock' ? 'success' : 'error'}
-                      size="small"
-                      sx={{ mr: 1 }}
+                      label={product.stock_status === 'in_stock' ? "Còn hàng" : "Hết hàng"} 
+                      color={product.stock_status === 'in_stock' ? "success" : "error"} 
+                      size="small" 
                     />
                   </Box>
                 </CardContent>
