@@ -18,7 +18,7 @@ const About = () => {
 
       <Container maxWidth="lg" sx={{ py: 8 }}>
         <Grid container spacing={6}>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={6} color={'#fff'}>
             <Typography variant="h4" component="h2" gutterBottom>
               Câu chuyện của chúng tôi
             </Typography>
@@ -41,13 +41,13 @@ const About = () => {
 
         <Divider sx={{ my: 8 }} />
 
-        <Typography variant="h4" component="h2" gutterBottom align="center" sx={{ mb: 6 }}>
+        <Typography color='#fff' variant="h4" component="h2" gutterBottom align="center" sx={{ mb: 6 }}>
           Giá trị cốt lõi
         </Typography>
 
         <Grid container spacing={4}>
           <Grid item xs={12} md={4}>
-            <Paper elevation={0} sx={{ p: 4, height: '100%', backgroundColor: '#f5f5f7' }}>
+            <Paper className="core-value-card" elevation={0}>
               <Typography variant="h5" component="h3" gutterBottom>
                 Chất lượng
               </Typography>
@@ -57,7 +57,7 @@ const About = () => {
             </Paper>
           </Grid>
           <Grid item xs={12} md={4}>
-            <Paper elevation={0} sx={{ p: 4, height: '100%', backgroundColor: '#f5f5f7' }}>
+            <Paper className="core-value-card" elevation={0}>
               <Typography variant="h5" component="h3" gutterBottom>
                 Tận tâm
               </Typography>
@@ -67,7 +67,7 @@ const About = () => {
             </Paper>
           </Grid>
           <Grid item xs={12} md={4}>
-            <Paper elevation={0} sx={{ p: 4, height: '100%', backgroundColor: '#f5f5f7' }}>
+            <Paper className="core-value-card" elevation={0}>
               <Typography variant="h5" component="h3" gutterBottom>
                 Sáng tạo
               </Typography>
@@ -80,42 +80,44 @@ const About = () => {
 
         <Divider sx={{ my: 8 }} />
 
-        <Typography variant="h4" component="h2" gutterBottom align="center" sx={{ mb: 6 }}>
-          Liên hệ với chúng tôi
-        </Typography>
+        <div className="contact-section">
+          <Typography variant="h4" color='#fff' component="h2" gutterBottom align="center" sx={{ mb: 6 }}>
+            Liên hệ với chúng tôi
+          </Typography>
 
-        <Grid container spacing={4}>
-          <Grid item xs={12} md={4}>
-            <Typography variant="h6" gutterBottom>
-              Địa chỉ
-            </Typography>
-            <Typography variant="body1">
-              123 Đường Nguyễn Huệ<br />
-              Quận 1, TP. Hồ Chí Minh<br />
-              Việt Nam
-            </Typography>
+          <Grid container spacing={4}>
+            <Grid item xs={12} md={4}>
+              <Typography variant="h6" gutterBottom>
+                Địa chỉ
+              </Typography>
+              <Typography variant="body1">
+                123 Đường Nguyễn Huệ<br />
+                Quận 1, TP. Hồ Chí Minh<br />
+                Việt Nam
+              </Typography>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Typography variant="h6" gutterBottom>
+                Liên hệ
+              </Typography>
+              <Typography variant="body1">
+                Điện thoại: (028) 1234 5678<br />
+                Email: info@applestore.vn<br />
+                Hotline: 1900 1234
+              </Typography>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Typography variant="h6" gutterBottom>
+                Giờ làm việc
+              </Typography>
+              <Typography variant="body1">
+                Thứ 2 - Thứ 6: 8:00 - 21:00<br />
+                Thứ 7 - Chủ nhật: 9:00 - 21:00<br />
+                Ngày lễ: 9:00 - 20:00
+              </Typography>
+            </Grid>
           </Grid>
-          <Grid item xs={12} md={4}>
-            <Typography variant="h6" gutterBottom>
-              Liên hệ
-            </Typography>
-            <Typography variant="body1">
-              Điện thoại: (028) 1234 5678<br />
-              Email: info@applestore.vn<br />
-              Hotline: 1900 1234
-            </Typography>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Typography variant="h6" gutterBottom>
-              Giờ làm việc
-            </Typography>
-            <Typography variant="body1">
-              Thứ 2 - Thứ 6: 8:00 - 21:00<br />
-              Thứ 7 - Chủ nhật: 9:00 - 21:00<br />
-              Ngày lễ: 9:00 - 20:00
-            </Typography>
-          </Grid>
-        </Grid>
+        </div>
       </Container>
     </div>
   );

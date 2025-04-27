@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Container, Grid, Typography, Link, IconButton } from '@mui/material';
+import { Box, Container, Typography, Link, IconButton } from '@mui/material';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import InstagramIcon from '@mui/icons-material/Instagram';
@@ -10,17 +10,31 @@ const Footer = () => {
   return (
     <Box component="footer" className="footer">
       <Container maxWidth="lg">
-        <Grid container spacing={4}>
-          <Grid item xs={12} sm={6} md={3}>
+        <div className="footer-content">
+          <div>
             <Typography variant="h6" gutterBottom>
               Apple Store
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Cung cấp các sản phẩm chính hãng từ Apple với chất lượng tốt nhất và dịch vụ chăm sóc khách hàng tận tâm.
             </Typography>
-          </Grid>
+            <Box className="social-icons">
+              <IconButton color="inherit" aria-label="Facebook">
+                <FacebookIcon />
+              </IconButton>
+              <IconButton color="inherit" aria-label="Twitter">
+                <TwitterIcon />
+              </IconButton>
+              <IconButton color="inherit" aria-label="Instagram">
+                <InstagramIcon />
+              </IconButton>
+              <IconButton color="inherit" aria-label="YouTube">
+                <YouTubeIcon />
+              </IconButton>
+            </Box>
+          </div>
           
-          <Grid item xs={12} sm={6} md={3}>
+          <div>
             <Typography variant="h6" gutterBottom>
               Sản phẩm
             </Typography>
@@ -30,10 +44,11 @@ const Footer = () => {
               <li><Link href="#">MacBook</Link></li>
               <li><Link href="#">Apple Watch</Link></li>
               <li><Link href="#">AirPods</Link></li>
+              <li><Link href="#">Phụ kiện</Link></li>
             </ul>
-          </Grid>
+          </div>
           
-          <Grid item xs={12} sm={6} md={3}>
+          <div>
             <Typography variant="h6" gutterBottom>
               Hỗ trợ
             </Typography>
@@ -43,10 +58,11 @@ const Footer = () => {
               <li><Link href="#">Bảo hành</Link></li>
               <li><Link href="#">Thanh toán</Link></li>
               <li><Link href="#">Vận chuyển</Link></li>
+              <li><Link href="#">FAQ</Link></li>
             </ul>
-          </Grid>
+          </div>
           
-          <Grid item xs={12} sm={6} md={3}>
+          <div>
             <Typography variant="h6" gutterBottom>
               Liên hệ
             </Typography>
@@ -56,14 +72,14 @@ const Footer = () => {
             <Typography variant="body2" paragraph>
               Email: support@applestore.com.vn
             </Typography>
-            <Box className="social-icons">
-              <IconButton color="primary"><FacebookIcon /></IconButton>
-              <IconButton color="primary"><TwitterIcon /></IconButton>
-              <IconButton color="primary"><InstagramIcon /></IconButton>
-              <IconButton color="primary"><YouTubeIcon /></IconButton>
-            </Box>
-          </Grid>
-        </Grid>
+            <Typography variant="body2" paragraph>
+              Địa chỉ: 123 Đường Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh
+            </Typography>
+            <Typography variant="body2">
+              Giờ làm việc: 8:00 - 21:00 (Thứ 2 - Chủ nhật)
+            </Typography>
+          </div>
+        </div>
         
         <Box className="footer-bottom">
           <Typography variant="body2" color="text.secondary" align="center">
