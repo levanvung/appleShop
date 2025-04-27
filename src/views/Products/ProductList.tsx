@@ -84,6 +84,14 @@ const ProductList = () => {
     navigate(`/product/${productId}`);
   };
 
+  const getRandomCity = () => {
+    const cities = [
+      'TP. Hồ Chí Minh', 
+      'TP. Hà Nội'
+    ];
+    return cities[Math.floor(Math.random() * cities.length)];
+  };
+
   return (
     <div className="products">
       <Container maxWidth="xl" sx={{ py: 6, px: { xs: 2, md: 4 } }}>
@@ -155,6 +163,13 @@ const ProductList = () => {
                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 'auto' }}>
                                   <Typography variant="h6" color="primary">
                                     {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.product_price)}
+                                  </Typography>
+                                  <Typography 
+                                    variant="body2" 
+                                    color="text.secondary"
+                                    sx={{ fontSize: '0.7rem', ml: 1 }}
+                                  >
+                                    {getRandomCity()}
                                   </Typography>
                                   <Chip 
                                     label={

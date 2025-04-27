@@ -564,7 +564,9 @@ const ProductDetail = () => {
                       </IconButton>
                     </Box>
                     <Typography variant="body2" sx={{ mt: 1, opacity: 0.7 }}>
-                      (Còn {product.product_quantity} sản phẩm)
+                      {product.stock_status === 'out_of_stock' 
+                        ? 'Hết hàng' 
+                        : `Còn hàng${product.product_quantity ? ` (${product.product_quantity} sản phẩm)` : ''}`}
                     </Typography>
                   </Box>
                   
@@ -575,7 +577,7 @@ const ProductDetail = () => {
                       startIcon={<ShoppingCart />} 
                       onClick={handleAddToCart}
                       ref={buttonRef}
-                      disabled={product.product_quantity < 1}
+                      disabled={product.stock_status === 'out_of_stock'}
                       sx={{ flexGrow: 1 }}
                     >
                       Thêm vào giỏ hàng
@@ -583,7 +585,7 @@ const ProductDetail = () => {
                     <Button 
                       variant="outlined" 
                       onClick={handleBuyNow}
-                      disabled={product.product_quantity < 1}
+                      disabled={product.stock_status === 'out_of_stock'}
                       sx={{ flexGrow: 1 }}
                     >
                       Mua ngay

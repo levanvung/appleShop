@@ -40,6 +40,7 @@ const Home = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
+  const [discountRates, setDiscountRates] = useState<Record<string, number>>({});
 
   const bannerItems: BannerItem[] = [
     {
@@ -77,6 +78,15 @@ const Home = () => {
           const productsData = Array.isArray(response.metadata) 
             ? response.metadata 
             : [response.metadata];
+          
+          // Tạo discount rate cho mỗi sản phẩm
+          const discounts: Record<string, number> = {};
+          productsData.forEach(product => {
+            // Random từ 10 đến 20
+            discounts[product._id] = Math.floor(Math.random() * 11) + 10;
+          });
+          
+          setDiscountRates(discounts);
           setProducts(productsData);
         } else {
           setProducts([]);
@@ -129,6 +139,14 @@ const Home = () => {
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+  };
+
+  const getRandomCity = () => {
+    const cities = [
+      'TP. Hồ Chí Minh', 
+      'TP. Hà Nội'
+    ];
+    return cities[Math.floor(Math.random() * cities.length)];
   };
 
   return (
@@ -197,11 +215,12 @@ const Home = () => {
             variant="h3" 
             component="h2" 
             gutterBottom 
-            textAlign="center" 
-            mb={5}
+            align="center" 
             className="featured-products-title"
+            sx={{ mb: 5, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
-            Danh sách sản phẩm
+            <LocalFireDepartmentIcon className="fire-icon" sx={{ mr: 1 }} />
+            DANH SÁCH SẢN PHẨM
           </Typography>
 
           {loading ? (
@@ -218,7 +237,7 @@ const Home = () => {
                 width: '100%',
                 display: 'flex',
                 flexWrap: 'wrap',
-                margin: '-16px'
+                margin: '-12px'
               }}
             >
               {products.map((product) => (
@@ -228,9 +247,11 @@ const Home = () => {
                     width: {
                       xs: '100%',
                       sm: '50%',
-                      md: '25%'
+                      md: '33.33%',
+                      lg: '20%',
+                      xl: '16.66%'
                     },
-                    padding: '16px',
+                    padding: '12px',
                     boxSizing: 'border-box'
                   }}
                 >
@@ -242,49 +263,165 @@ const Home = () => {
                       cursor: 'pointer', 
                       height: '100%', 
                       display: 'flex', 
-                      flexDirection: 'column'
+                      flexDirection: 'column',
+                      borderRadius: '8px',
+                      overflow: 'hidden',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                      transition: 'transform 0.3s, box-shadow 0.3s',
+                      '&:hover': {
+                        transform: 'translateY(-8px)',
+                        boxShadow: '0 8px 16px rgba(0,0,0,0.1)'
+                      }
                     }}
                   >
-                    <CardMedia
-                      component="img"
-                      image={product.product_thumb || `https://placehold.co/300x200/333/fff?text=${encodeURIComponent(product.product_name)}`}
-                      alt={product.product_name}
-                      sx={{ height: 300, objectFit: 'contain', padding: '16px', backgroundColor: '#000' }}
-                    />
-                    <CardContent className="featured-product-info" sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', backgroundColor: 'transparent !important' }}>
-                      <Typography className="featured-product-price" variant="h6" component="h3" sx={{ fontWeight: 'bold', mb: 1 }}>
-                        {formatPrice(product.product_price)}
-                      </Typography>
-                      <Typography className="featured-product-title" variant="body1" sx={{ mb: 1 }}>
+                    <Box sx={{ position: 'relative' }}>
+                      <CardMedia
+                        component="img"
+                        image={product.product_thumb || `https://placehold.co/300x200/333/fff?text=${encodeURIComponent(product.product_name)}`}
+                        alt={product.product_name}
+                        sx={{ 
+                          height: 180, 
+                          objectFit: 'contain', 
+                          backgroundColor: '#f5f5f5',
+                          padding: '8px'
+                        }}
+                      />
+                      {/* Discount tag */}
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          top: 10,
+                          left: 10,
+                          backgroundColor: 'error.main',
+                          color: 'white',
+                          fontWeight: 'bold',
+                          padding: '3px 6px',
+                          borderRadius: '4px',
+                          fontSize: '0.7rem'
+                        }}
+                      >
+                        -{discountRates[product._id] || 15}%
+                      </Box>
+                    </Box>
+                    <CardContent 
+                      sx={{ 
+                        flexGrow: 1, 
+                        display: 'flex', 
+                        flexDirection: 'column', 
+                        alignItems: 'flex-start', 
+                        textAlign: 'left', 
+                        padding: '12px',
+                        '&:last-child': { paddingBottom: '12px' }
+                      }}
+                    >
+                      <Typography 
+                        variant="h6" 
+                        component="h3" 
+                        sx={{ 
+                          fontSize: '0.9rem',
+                          fontWeight: 600, 
+                          mb: 1, 
+                          lineHeight: 1.2,
+                          height: '2.4em',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical'
+                        }}
+                      >
                         {product.product_name}
                       </Typography>
-                      <Typography className="featured-product-description" variant="body2" sx={{ mb: 2 }}>
-                        {product.product_description}
-                      </Typography>
+                      
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                        <Typography 
+                          variant="h6" 
+                          color="error.main" 
+                          sx={{ 
+                            fontWeight: 'bold', 
+                            fontSize: '0.95rem' 
+                          }}
+                        >
+                          {formatPrice(product.product_price)}
+                        </Typography>
+                        <Typography 
+                          sx={{ 
+                            textDecoration: 'line-through', 
+                            color: 'text.secondary', 
+                            ml: 1,
+                            fontSize: '0.8rem'
+                          }}
+                        >
+                          {formatPrice(Math.round(product.product_price * (1 + discountRates[product._id] / 100) || 1.15))}
+                        </Typography>
+                      </Box>
+                      
+                      {/* Rating */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                        <Typography 
+                          variant="body2" 
+                          sx={{ 
+                            backgroundColor: '#fff9c4', 
+                            px: 0.5,
+                            mr: 1, 
+                            borderRadius: '4px',
+                            fontWeight: 'bold',
+                            color: '#ff8f00',
+                            fontSize: '0.7rem'
+                          }}
+                        >
+                          5.0
+                        </Typography>
+                        <Typography 
+                          variant="body2" 
+                          color="text.secondary"
+                          sx={{ fontSize: '0.7rem' }}
+                        >
+                          {getRandomCity()}
+                        </Typography>
+                      </Box>
                       
                       {/* Conditional Rendering based on stock_status */}
                       {product.stock_status === 'out_of_stock' ? (
                         <Typography 
                           variant="button" 
                           color="error" 
-                          sx={{ fontWeight: 'bold', mt: 1 }}
+                          sx={{ fontWeight: 'bold', mt: 'auto', fontSize: '0.8rem' }}
                         >
-                          Hết hàng !!
+                          Hết hàng
                         </Typography>
                       ) : (
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleProductClick(product._id);
-                          }}
-                          className="featured-product-button"
-                          sx={{ textTransform: 'none' }}
-                        >
-                          <ShoppingCartIcon sx={{ mr: 1 }} />
-                          Xem
-                        </Button>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', mt: 'auto' }}>
+                          <Button
+                            variant="contained"
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleProductClick(product._id);
+                            }}
+                            className="featured-product-button"
+                            sx={{ 
+                              textTransform: 'none', 
+                              backgroundColor: '#1976d2',
+                              px: 1,
+                              py: 0.5,
+                              fontSize: '0.7rem',
+                              '&:hover': {
+                                backgroundColor: '#1565c0'
+                              }
+                            }}
+                          >
+                            <ShoppingCartIcon sx={{ mr: 0.5, fontSize: '0.9rem' }} />
+                            Xem chi tiết
+                          </Button>
+                          <Typography 
+                            variant="body2" 
+                            className="product-quantity"
+                            sx={{ fontSize: '0.7rem' }}
+                          >
+                            {product.product_quantity}
+                          </Typography>
+                        </Box>
                       )}
                     </CardContent>
                   </Card>
@@ -295,8 +432,14 @@ const Home = () => {
         </Container>
       </div>
 
-      <Box sx={{ py: 5, backgroundColor: '#f5f5f5' }}>
-        <Container maxWidth="lg">
+      <Box 
+        className="hot-products-section"
+        sx={{ 
+          py: 5, 
+          backgroundImage: 'url("https://4kwallpapers.com/images/walls/thumbs_2t/11375.jpg")',
+        }}
+      >
+        <Container maxWidth="lg" className="hot-products-content">
           <Box 
             sx={{ 
               display: 'flex', 
@@ -305,29 +448,40 @@ const Home = () => {
               mb: 4 
             }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <LocalFireDepartmentIcon sx={{ color: 'error.main', mr: 1, fontSize: 32 }} />
+            <Box sx={{ display: 'flex', alignItems: 'center' }} className="hot-products-title">
+              <LocalFireDepartmentIcon 
+                className="fire-icon" 
+                sx={{ 
+                  fontSize: '2.5rem',
+                  color: '#ff4500',
+                  animation: 'flicker 1.5s infinite alternate',
+                  filter: 'drop-shadow(0 0 5px #ff4500)',
+                  marginRight: '10px'
+                }} 
+              />
               <Typography variant="h4" component="h2" fontWeight="bold">
                 Sản phẩm nổi bật
               </Typography>
             </Box>
             <Button 
-              variant="outlined" 
-              color="primary" 
+              variant="contained" 
+              className="hot-product-button"
               component={Link} 
               to="/hot-products"
               endIcon={<ArrowForwardIcon />}
+              sx={{ borderRadius: '30px', px: 3 }}
             >
               Xem tất cả
             </Button>
           </Box>
-          <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 4 }}>
+          <Typography variant="subtitle1" sx={{ mb: 4, color: 'rgba(255, 255, 255, 0.8)' }}>
             Khám phá các sản phẩm được ưa chuộng nhất với ưu đãi đặc biệt
           </Typography>
           
           {/* Hot products promo image */}
           <Paper 
             elevation={0}
+            className="hot-product-card"
             sx={{
               p: 3,
               display: 'flex',
@@ -335,7 +489,8 @@ const Home = () => {
               alignItems: 'center',
               borderRadius: 2,
               overflow: 'hidden',
-              backgroundColor: '#ffe8e8',
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              backdropFilter: 'blur(10px)',
               transition: 'transform 0.3s',
               '&:hover': {
                 transform: 'translateY(-5px)'
@@ -343,15 +498,26 @@ const Home = () => {
             }}
           >
             <Box sx={{ flex: 1, p: 3 }}>
-              <Typography variant="h3" component="h3" fontWeight="bold" color="error.main" gutterBottom>
+              <Typography 
+                variant="h3" 
+                component="h3" 
+                fontWeight="bold" 
+                sx={{ 
+                  background: 'linear-gradient(45deg, #ff4500, #ff7800)',
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                  color: 'transparent',
+                  mb: 2
+                }}
+              >
                 Sản phẩm HOT
               </Typography>
               <Typography variant="h6" component="p" color="text.secondary" sx={{ mb: 3 }}>
                 Khám phá ngay các sản phẩm đang được săn đón nhiều nhất hiện nay!
               </Typography>
               <Button 
-                variant="contained" 
-                color="error" 
+                variant="contained"
+                className="hot-product-button"
                 size="large"
                 component={Link}
                 to="/hot-products"
@@ -370,13 +536,21 @@ const Home = () => {
               }}
             >
               <img 
-                src="https://substackcdn.com/image/fetch/w_520,h_272,c_fill,f_auto,q_auto:good,fl_progressive:steep,g_auto/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fc5d565fe-8522-40e9-a7f9-77009865ed04_686x386.jpeg" 
+                src="https://vnmedia.vn/file/8a10a0d36ccebc89016ce0c6fa3e1b83/072023/macbook_205_inch_20230724105159.jpg" 
                 alt="Hot Products"
                 style={{ 
                   maxWidth: '100%',
                   height: 'auto',
                   borderRadius: '10px',
-                  boxShadow: '0 10px 20px rgba(0,0,0,0.1)'
+                  boxShadow: '0 10px 20px rgba(0,0,0,0.2)',
+                  transform: 'perspective(1000px) rotateY(-5deg)',
+                  transition: 'transform 0.5s',
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = 'perspective(1000px) rotateY(0deg)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = 'perspective(1000px) rotateY(-5deg)';
                 }}
               />
             </Box>

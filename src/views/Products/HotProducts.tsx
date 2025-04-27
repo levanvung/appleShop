@@ -7,7 +7,6 @@ import {
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import { productService, Product } from '../../api/product';
-import { formatCurrency } from '../../utils/formatters';
 import './Products.css';
 
 const HotProducts = () => {
@@ -45,6 +44,18 @@ const HotProducts = () => {
 
   const handleProductClick = (productId: string) => {
     navigate(`/product/${productId}`);
+  };
+
+  const getRandomCity = () => {
+    const cities = [
+      'TP. Hồ Chí Minh', 
+      'TP. Hà Nội'
+    ];
+    return cities[Math.floor(Math.random() * cities.length)];
+  };
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('vi-VN').format(value);
   };
 
   if (loading) {
@@ -132,11 +143,20 @@ const HotProducts = () => {
                     <Typography variant="h6" color="primary" fontWeight="bold" sx={{ mb: 1 }}>
                       {formatCurrency(product.product_price)} đ
                     </Typography>
-                    <Chip 
-                      label={product.stock_status === 'in_stock' ? "Còn hàng" : "Hết hàng"} 
-                      color={product.stock_status === 'in_stock' ? "success" : "error"} 
-                      size="small" 
-                    />
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                      <Chip 
+                        label={product.stock_status === 'in_stock' ? "Còn hàng" : "Hết hàng"} 
+                        color={product.stock_status === 'in_stock' ? "success" : "error"} 
+                        size="small" 
+                      />
+                      <Typography 
+                        variant="body2" 
+                        color="text.secondary"
+                        sx={{ fontSize: '0.7rem', ml: 1 }}
+                      >
+                        {getRandomCity()}
+                      </Typography>
+                    </Box>
                   </Box>
                 </CardContent>
                 <Button 
