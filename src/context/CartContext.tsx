@@ -35,7 +35,7 @@ interface CartContextType {
   cart: CartItem[]; // Alias for cartItems to match with Checkout component
   cartCount: number;
   isCartOpen: boolean;
-  addToCart: (item: CartItem) => Promise<{ success: boolean; message?: string }>;
+  addToCart: (item: CartItem, skipOpenCart?: boolean) => Promise<{ success: boolean; message?: string }>;
   removeFromCart: (id: string) => Promise<void>;
   increaseQuantity: (id: string, color: string) => void;
   decreaseQuantity: (id: string, color: string) => void;
@@ -111,7 +111,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     }
   }, []);
 
-  const addToCart = async (item: CartItem) => {
+  const addToCart = async (item: CartItem, skipOpenCart?: boolean) => {
     try {
       // Gọi API thêm vào giỏ hàng
       await cartService.addToCart({
@@ -122,8 +122,10 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       // Fetch lại giỏ hàng sau khi thêm thành công
       await fetchCart();
       
-      // Mở giỏ hàng khi thêm sản phẩm mới
-      setIsCartOpen(true);
+      // Chỉ mở giỏ hàng khi thêm sản phẩm mới nếu không có skipOpenCart
+      if (!skipOpenCart) {
+        setIsCartOpen(true);
+      }
       
       // Return success with no error message
       return { success: true };

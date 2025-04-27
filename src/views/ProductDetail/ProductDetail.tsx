@@ -218,7 +218,8 @@ const ProductDetail = () => {
     };
     
     try {
-      const result = await addToCart(cartItem);
+      // Truyền true cho skipOpenCart để không mở giỏ hàng
+      const result = await addToCart(cartItem, true);
       
       if (result.success) {
         // Proceed to checkout
