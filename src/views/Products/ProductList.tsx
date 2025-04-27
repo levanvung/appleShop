@@ -120,7 +120,6 @@ const ProductList = () => {
                     display: 'flex',
                     flexWrap: 'wrap',
                     justifyContent: 'flex-start',
-                    gap: 0,
                     width: '100%'
                   }}>
                     {displayedProducts.map((product) => (
@@ -142,7 +141,7 @@ const ProductList = () => {
                           boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
                           transition: 'all 0.4s ease',
                           position: 'relative',
-                          m: 0.5,
+                          m: 0,
                           '&:hover': {
                             transform: 'translateY(-6px) scale(1.01)',
                             boxShadow: '0 12px 20px rgba(0,0,0,0.15)'

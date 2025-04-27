@@ -438,7 +438,7 @@ const ProductDetail = () => {
             <Box sx={{ flex: { xs: '0 0 100%', md: '0 0 calc(50% - 16px)' } }}>
               <Paper elevation={0} className="product-details-paper">
                 <Box className="product-details-info">
-                  <Typography variant="h4" component="h1" className="product-title" gutterBottom>
+                  <Typography variant="h4" component="h1" className="product-title" gutterBottom sx={{ textAlign: 'left' }}>
                     {product.product_name}
                   </Typography>
                   
@@ -465,7 +465,7 @@ const ProductDetail = () => {
                     />
                   </Box>
                   
-                  <Typography variant="h5" component="p" sx={{ fontWeight: 'bold', my: 2, color: '#2196f3' }}>
+                  <Typography variant="h5" component="p" sx={{ fontWeight: 'bold', my: 2, color: '#2196f3', textAlign: 'left' }}>
                     {formatPrice(product.product_price)}
                   </Typography>
                   
@@ -489,18 +489,6 @@ const ProductDetail = () => {
                   </Box>
                   
                   <Divider sx={{ my: 3 }} />
-                  
-                  {/* Attributes Section */}
-                  <Box sx={{ mb: 3 }}>
-                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>Chi tiết sản phẩm</Typography>
-                    <Box sx={{ background: 'rgba(255, 255, 255, 0.05)', p: 2, borderRadius: 2 }}>
-                      <Typography variant="body2" sx={{ mb: 1 }}>Nhà sản xuất: {product.product_attributes?.manufacturer || 'N/A'}</Typography>
-                      <Typography variant="body2" sx={{ mb: 1 }}>Model: {product.product_attributes?.model || 'N/A'}</Typography>
-                      {product.product_attributes?.color && !productColors.length && (
-                        <Typography variant="body2">Màu sắc: {product.product_attributes.color}</Typography>
-                      )}
-                    </Box>
-                  </Box>
                   
                   {/* Color Selection */}
                   {productColors.length > 0 && (
@@ -553,7 +541,6 @@ const ProductDetail = () => {
                   
                   {/* Quantity */}
                   <Box sx={{ mb: 3 }}>
-                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>Số lượng:</Typography>
                     <Box className="quantity-selector">
                       <IconButton size="small" onClick={() => handleQuantityChange(-1)} disabled={quantity <= 1}>
                         <RemoveIcon fontSize="small" />
@@ -563,11 +550,6 @@ const ProductDetail = () => {
                         <AddIcon fontSize="small" />
                       </IconButton>
                     </Box>
-                    <Typography variant="body2" sx={{ mt: 1, opacity: 0.7 }}>
-                      {product.stock_status === 'out_of_stock' 
-                        ? 'Hết hàng' 
-                        : `Còn hàng${product.product_quantity ? ` (${product.product_quantity} sản phẩm)` : ''}`}
-                    </Typography>
                   </Box>
                   
                   {/* Action Buttons */}

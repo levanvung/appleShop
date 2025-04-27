@@ -333,13 +333,19 @@ const Home = () => {
                         {product.product_name}
                       </Typography>
                       
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                      <Box sx={{ 
+                        display: 'flex', 
+                        flexDirection: 'column',
+                        alignItems: 'flex-start', 
+                        mb: 1 
+                      }}>
                         <Typography 
                           variant="h6" 
                           color="error.main" 
                           sx={{ 
                             fontWeight: 'bold', 
-                            fontSize: '0.95rem' 
+                            fontSize: '0.95rem',
+                            mb: 0.5
                           }}
                         >
                           {formatPrice(product.product_price)}
@@ -347,8 +353,7 @@ const Home = () => {
                         <Typography 
                           sx={{ 
                             textDecoration: 'line-through', 
-                            color: 'text.secondary', 
-                            ml: 1,
+                            color: 'text.secondary',
                             fontSize: '0.8rem'
                           }}
                         >

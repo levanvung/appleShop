@@ -481,3 +481,24 @@
   transform: translateY(-3px) !important;
   box-shadow: 0 6px 15px rgba(255, 69, 0, 0.4) !important;
 }
+
+/* Phần styled cập nhật cho giá */
+.featured-product-card .MuiCardContent-root .price-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.featured-product-card .MuiCardContent-root .price-current {
+  font-weight: bold;
+  color: #e53935;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+
+.featured-product-card .MuiCardContent-root .price-original {
+  text-decoration: line-through;
+  color: #9e9e9e;
+  font-size: 0.8rem;
+}

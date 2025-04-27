@@ -232,7 +232,7 @@
   /* background: rgba(255, 255, 255, 0.1) !important; */
   /* backdrop-filter: blur(5px); */
   border: 1px solid rgba(255, 255, 255, 0.3);
-  margin: 0 auto !important;
+  margin: 0 !important; /* Bỏ auto margin để tránh căn giữa */
 }
 
 .product-card:hover {
@@ -375,17 +375,18 @@
 .grid-container {
   display: flex;
   flex-wrap: wrap;
-  margin: -12px;
+  margin: 0; /* Bỏ margin âm */
   width: 100%;
-  gap: 8px;
-  justify-content: center;
+  gap: 28px; /* Tăng khoảng cách giữa các card */
+  justify-content: flex-start !important; /* Đảm bảo luôn sắp xếp từ trái qua phải */
+  align-items: stretch;
 }
 
 .grid-item {
-  padding: 4px; 
+  padding: 0; /* Bỏ padding để card sát nhau hơn */
   box-sizing: border-box;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .mobile-item {
