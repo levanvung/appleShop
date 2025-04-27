@@ -115,6 +115,7 @@
   position: relative;
   overflow: hidden;
   cursor: pointer;
+  text-align: left !important;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   background: rgba(255, 255, 255, 0.1) !important;
   backdrop-filter: blur(10px);
@@ -227,8 +228,9 @@
   overflow: hidden;
   border-radius: 12px !important;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1) !important;
-  background: rgba(255, 255, 255, 0.1) !important;
-  backdrop-filter: blur(5px);
+  /* Background được ghi đè tại component */
+  /* background: rgba(255, 255, 255, 0.1) !important; */
+  /* backdrop-filter: blur(5px); */
   border: 1px solid rgba(255, 255, 255, 0.3);
   margin: 0 auto !important;
 }
@@ -250,6 +252,44 @@
 
 .product-card .MuiCardContent-root {
   padding: 16px 20px 20px;
+}
+
+/* Bỏ padding cho h3 trong product-card */
+.product-card h3 {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Bỏ padding cho p trong product-card */
+.product-card p {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Giảm kích thước font cho tất cả Typography trong product-card */
+.product-card .MuiTypography-root {
+  /* Color được ghi đè tại component */
+  /* color: white !important; */
+  font-size: 16px !important;
+}
+
+/* Ngoại lệ cho giá sản phẩm */
+.product-card .MuiTypography-root[color="error.main"],
+.product-card h6.MuiTypography-root {
+  font-size: 0.85rem !important;
+}
+
+.product-card .MuiChip-root {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+}
+
+.product-card .MuiChip-root.MuiChip-colorSuccess {
+  background: rgba(46, 125, 50, 0.3) !important;
+}
+
+.product-card .MuiChip-root.MuiChip-colorError {
+  background: rgba(211, 47, 47, 0.3) !important;
 }
 
 .product-breadcrumbs {
@@ -278,11 +318,8 @@
 }
 
 .products-container {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  padding: 24px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  justify-content: flex-start;
 }
 
 /* Pagination Styles */
@@ -340,11 +377,12 @@
   flex-wrap: wrap;
   margin: -12px;
   width: 100%;
+  gap: 8px;
   justify-content: center;
 }
 
 .grid-item {
-  padding: 12px;
+  padding: 4px; 
   box-sizing: border-box;
   display: flex;
   justify-content: center;
@@ -418,21 +456,4 @@
   height: 100%;
   display: flex;
   justify-content: center;
-}
-
-.product-card .MuiTypography-root {
-  color: white !important;
-}
-
-.product-card .MuiChip-root {
-  background: rgba(255, 255, 255, 0.2) !important;
-  color: white !important;
-}
-
-.product-card .MuiChip-root.MuiChip-colorSuccess {
-  background: rgba(46, 125, 50, 0.3) !important;
-}
-
-.product-card .MuiChip-root.MuiChip-colorError {
-  background: rgba(211, 47, 47, 0.3) !important;
 } 
