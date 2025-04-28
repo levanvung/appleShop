@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Drawer,
   Box,
@@ -9,7 +9,8 @@ import {
   Checkbox,
   Avatar,
   Snackbar,
-  Alert
+  Alert,
+  FormControlLabel
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
@@ -23,6 +24,7 @@ const Cart = () => {
   const navigate = useNavigate();
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [allSelected, setAllSelected] = useState(false);
   
   const { 
     cartItems, 
@@ -31,16 +33,21 @@ const Cart = () => {
     closeCart, 
     removeFromCart, 
     isLoading,
-    updateQuantity
+    updateQuantity,
+    toggleSelectItem,
+    selectAll,
+    calculateSelectedTotal
   } = useCart();
 
-  // Tính tổng tiền
+  // Kiểm tra và cập nhật trạng thái "chọn tất cả" mỗi khi cartItems thay đổi
+  useEffect(() => {
+    const areAllSelected = cartItems.length > 0 && cartItems.every(item => item.selected);
+    setAllSelected(areAllSelected);
+  }, [cartItems]);
+
+  // Tính tổng tiền cho các sản phẩm đã chọn
   const calculateTotal = () => {
-    return cartItems.reduce((total, item) => {
-      // Chuyển đổi giá từ string sang number (loại bỏ ký tự không phải số)
-      const price = Number(item.price.replace(/[^\d]/g, ''));
-      return total + price * item.quantity;
-    }, 0);
+    return calculateSelectedTotal();
   };
 
   // Format tiền tệ
@@ -51,6 +58,18 @@ const Cart = () => {
   };
 
   const total = calculateTotal();
+
+  // Xử lý khi chọn/bỏ chọn tất cả sản phẩm
+  const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = event.target.checked;
+    setAllSelected(checked);
+    selectAll(checked);
+  };
+
+  // Xử lý khi chọn/bỏ chọn một sản phẩm
+  const handleSelectItem = (id: string) => {
+    toggleSelectItem(id);
+  };
 
   // Xử lý xóa sản phẩm
   const handleRemoveItem = async (id: string) => {
@@ -115,6 +134,13 @@ const Cart = () => {
 
   // Hàm xử lý khi nhấn nút Checkout
   const handleCheckout = () => {
+    // Kiểm tra xem có sản phẩm nào được chọn không
+    const selectedItems = cartItems.filter(item => item.selected);
+    if (selectedItems.length === 0) {
+      showSnackbar('Vui lòng chọn ít nhất một sản phẩm để thanh toán');
+      return;
+    }
+    
     closeCart(); // Đóng giỏ hàng trước khi chuyển trang
     navigate('/checkout');
   };
@@ -154,6 +180,21 @@ const Cart = () => {
             </Box>
           )}
 
+          {/* Select All Checkbox */}
+          {!isLoading && cartItems.length > 0 && (
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 2 }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={allSelected}
+                    onChange={handleSelectAll}
+                  />
+                }
+                label="Chọn tất cả"
+              />
+            </Box>
+          )}
+
           {/* Cart items */}
           <Box className="cart-items">
             {!isLoading && cartItems.length === 0 ? (
@@ -164,7 +205,10 @@ const Cart = () => {
               cartItems.map((item) => (
                 <Box key={`${item.id}-${item.color}`} className="cart-item">
                   <Box sx={{ display: 'flex', alignItems: 'flex-start', width: '100%' }}>
-                    <Checkbox />
+                    <Checkbox 
+                      checked={!!item.selected} 
+                      onChange={() => handleSelectItem(item.id)}
+                    />
                     <Box sx={{ width: '80px', height: '80px', mr: 2 }}>
                       <Avatar 
                         variant="square"
@@ -225,6 +269,9 @@ const Cart = () => {
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Box>
                     <Typography variant="h6">Total</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      (Chỉ tính các sản phẩm đã chọn)
+                    </Typography>
                   </Box>
                   <Box>
                     <Typography variant="h6" fontWeight="bold">

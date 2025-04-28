@@ -27,6 +27,7 @@ export interface CartItem {
   colorName: string;
   quantity: number;
   size?: string;
+  selected?: boolean;
 }
 
 // Định nghĩa kiểu dữ liệu cho context
@@ -35,7 +36,7 @@ interface CartContextType {
   cart: CartItem[]; // Alias for cartItems to match with Checkout component
   cartCount: number;
   isCartOpen: boolean;
-  addToCart: (item: CartItem, skipOpenCart?: boolean) => Promise<{ success: boolean; message?: string }>;
+  addToCart: (item: CartItem, skipOpenCart?: boolean) => Promise<{ success: boolean; message?: string; requireLogin?: boolean }>;
   removeFromCart: (id: string) => Promise<void>;
   increaseQuantity: (id: string, color: string) => void;
   decreaseQuantity: (id: string, color: string) => void;
@@ -43,8 +44,11 @@ interface CartContextType {
   toggleCart: () => void;
   closeCart: () => void;
   fetchCart: () => Promise<void>;
-  clearCart: () => void; // Add clearCart function
+  clearCart: () => void;
   isLoading: boolean;
+  toggleSelectItem: (id: string) => void;
+  selectAll: (selected: boolean) => void;
+  calculateSelectedTotal: () => number;
 }
 
 // Tạo context
@@ -81,7 +85,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       image: apiItem.thumb,
       color: apiItem.product_attributes.color || '',
       colorName: apiItem.product_attributes.color || 'Default',
-      quantity: apiItem.quantity
+      quantity: apiItem.quantity,
+      selected: false // Mặc định sản phẩm chưa được chọn khi tải từ API
     };
   };
 
@@ -112,6 +117,18 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   }, []);
 
   const addToCart = async (item: CartItem, skipOpenCart?: boolean) => {
+    // Kiểm tra xem người dùng đã đăng nhập chưa
+    const accessToken = localStorage.getItem('accessToken');
+    
+    if (!accessToken) {
+      // Nếu chưa đăng nhập, trả về thông báo lỗi
+      return { 
+        success: false, 
+        message: 'Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng', 
+        requireLogin: true 
+      };
+    }
+    
     try {
       // Gọi API thêm vào giỏ hàng
       await cartService.addToCart({
@@ -249,6 +266,36 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     setIsCartOpen(false);
   };
 
+  const toggleSelectItem = (id: string) => {
+    // Cập nhật trạng thái chọn/bỏ chọn cho sản phẩm có id tương ứng
+    setCartItems(prevItems => 
+      prevItems.map(item => 
+        item.id === id 
+          ? { ...item, selected: !item.selected } 
+          : item
+      )
+    );
+  };
+
+  const selectAll = (selected: boolean) => {
+    // Cập nhật trạng thái chọn/bỏ chọn cho tất cả sản phẩm
+    setCartItems(prevItems => 
+      prevItems.map(item => ({ ...item, selected }))
+    );
+  };
+
+  const calculateSelectedTotal = () => {
+    // Tính tổng tiền cho các sản phẩm đã chọn
+    return cartItems.reduce((total, item) => {
+      if (item.selected) {
+        // Chuyển đổi giá từ string sang number (loại bỏ ký tự không phải số)
+        const price = Number(item.price.replace(/[^\d]/g, ''));
+        return total + price * item.quantity;
+      }
+      return total;
+    }, 0);
+  };
+
   const value = {
     cartItems,
     cart: cartItems,
@@ -263,7 +310,10 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     closeCart,
     fetchCart,
     clearCart,
-    isLoading
+    isLoading,
+    toggleSelectItem,
+    selectAll,
+    calculateSelectedTotal
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

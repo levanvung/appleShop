@@ -17,7 +17,9 @@ import {
   StepLabel,
   Alert,
   Snackbar,
-  CircularProgress
+  CircularProgress,
+  Checkbox,
+  FormControlLabel
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -35,6 +37,7 @@ interface CartItem {
   colorName: string;
   size: string;
   quantity: number;
+  selected?: boolean;
 }
 
 interface CheckoutFormData {
@@ -86,13 +89,18 @@ interface ExtendedCartContext {
   cart: CartItem[];
   clearCart: () => void;
   cartCount: number;
+  toggleSelectItem: (id: string) => void;
+  selectAll: (selected: boolean) => void;
+  getSelectedItems: () => CartItem[];
+  calculateSelectedTotal: () => number;
 }
 
 const Checkout = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
-  const { cart, clearCart } = useCart() as ExtendedCartContext; // Type casting
+  const { cart, clearCart, toggleSelectItem, selectAll, calculateSelectedTotal } = useCart() as ExtendedCartContext; // Type casting
   
+  const [allSelected, setAllSelected] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -120,11 +128,24 @@ const Checkout = () => {
     }
   }, [isAuthenticated, cart, navigate]);
 
-  // Calculate total price
+  // Calculate total price for selected items
   const calculateSubtotal = () => {
-    return cart.reduce((sum, item) => {
-      return sum + (parseFloat(item.price) * item.quantity);
-    }, 0);
+    return calculateSelectedTotal();
+  };
+
+  // Handle select all checkbox
+  const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = event.target.checked;
+    setAllSelected(checked);
+    selectAll(checked);
+  };
+
+  // Handle individual item selection
+  const handleSelectItem = (id: string) => {
+    toggleSelectItem(id);
+    // Cập nhật trạng thái "chọn tất cả"
+    const allItemsSelected = cart.every(item => item.selected);
+    setAllSelected(allItemsSelected);
   };
 
   const shippingFee = 50000; // Phí vận chuyển cố định (50,000 VND)
@@ -158,13 +179,20 @@ const Checkout = () => {
       setError('Giỏ hàng của bạn đang trống');
       return;
     }
+
+    // Kiểm tra xem có sản phẩm nào được chọn không
+    const selectedItems = cart.filter(item => item.selected);
+    if (selectedItems.length === 0) {
+      setError('Vui lòng chọn ít nhất một sản phẩm để thanh toán');
+      return;
+    }
     
     setLoading(true);
     setError(null);
     
     try {
-      // Extract product IDs from cart
-      const productIds = cart.map((item: CartItem) => item.id);
+      // Extract product IDs from selected cart items
+      const productIds = selectedItems.map((item: CartItem) => item.id);
       
       // Create checkout payload
       const checkoutData = {
@@ -250,10 +278,27 @@ const Checkout = () => {
                   <Typography variant="h6" component="h2" gutterBottom className="order-summary-title">
                     Đơn hàng của bạn
                   </Typography>
+                  
+                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={allSelected}
+                          onChange={handleSelectAll}
+                        />
+                      }
+                      label="Chọn tất cả"
+                    />
+                  </Box>
+                  
                   <List sx={{ mb: 2 }}>
                     {cart.map((item) => (
                       <div key={`${item.id}-${item.color}-${item.size}`} className="cart-item">
                         <ListItem alignItems="flex-start" sx={{ px: 0 }}>
+                          <Checkbox
+                            checked={item.selected}
+                            onChange={() => handleSelectItem(item.id)}
+                          />
                           <ListItemAvatar>
                             <Avatar
                               alt={item.name}

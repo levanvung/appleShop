@@ -188,8 +188,19 @@ const ProductDetail = () => {
         setSnackbarMessage('Sản phẩm đã được thêm vào giỏ hàng!');
         setSnackbarSeverity('success');
       } else {
-        setSnackbarMessage(result.message || 'Không thể thêm sản phẩm vào giỏ hàng');
-        setSnackbarSeverity('error');
+        if (result.requireLogin) {
+          // Hiển thị thông báo
+          setSnackbarMessage('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng');
+          setSnackbarSeverity('warning');
+          
+          setTimeout(() => {
+            navigate('/signin', { state: { from: `/product/${product._id}` } });
+          }, 2000);
+        } else {
+          // Lỗi khác
+          setSnackbarMessage(result.message || 'Không thể thêm sản phẩm vào giỏ hàng');
+          setSnackbarSeverity('error');
+        }
       }
       
       setOpenSnackbar(true);
@@ -225,9 +236,21 @@ const ProductDetail = () => {
         // Proceed to checkout
         navigate('/checkout');
       } else {
-        // Show error
-        setSnackbarMessage(result.message || 'Không thể thêm sản phẩm vào giỏ hàng');
-        setSnackbarSeverity('error');
+        // Kiểm tra xem lỗi có phải yêu cầu đăng nhập không
+        if (result.requireLogin) {
+          // Hiển thị thông báo
+          setSnackbarMessage('Vui lòng đăng nhập để tiếp tục mua hàng');
+          setSnackbarSeverity('warning');
+          
+          // Chờ 2 giây trước khi chuyển hướng để người dùng thấy thông báo
+          setTimeout(() => {
+            navigate('/signin', { state: { from: `/product/${product._id}` } });
+          }, 2000);
+        } else {
+          // Lỗi khác
+          setSnackbarMessage(result.message || 'Không thể thêm sản phẩm vào giỏ hàng');
+          setSnackbarSeverity('error');
+        }
         setOpenSnackbar(true);
       }
     } catch (error) {
